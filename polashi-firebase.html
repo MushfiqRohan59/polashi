@@ -211,6 +211,12 @@ async function mutateRoom(code, mutator){
   const updated = mutator(fresh) || fresh;
   const ok = await saveRoom(code, updated);
   if(!ok) return null;
+  // Update the acting client's own view immediately instead of making it wait
+  // up to one poll interval to see the effect of its own action.
+  if(client.roomCode === code){
+    client.room = updated;
+    render();
+  }
   return updated;
 }
 
@@ -259,7 +265,7 @@ function startPolling(){
     render();
   };
   tick();
-  client.pollTimer = setInterval(tick, 2200);
+  client.pollTimer = setInterval(tick, 1100);
 }
 
 function connectionBanner(){
