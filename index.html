@@ -48,13 +48,15 @@
   label{ display:block; font-size:13px; letter-spacing:0.04em; color:#5a4d38; margin:14px 0 6px; font-family:'Noto Sans Bengali',serif; font-weight:600;}
   input[type=text]{ width:100%; padding:11px 12px; border-radius:3px; border:1px solid rgba(42,33,23,0.3); background:#F7F0DE; font-family:'Noto Sans Bengali',serif; font-size:17px; color:var(--ink);}
   input:focus{ outline:2px solid var(--gold);}
-  .btn{ font-family:'Noto Sans Bengali',serif; font-weight:700; letter-spacing:0.01em; font-size:15px; padding:13px 18px; border-radius:3px; border:none; cursor:pointer; width:100%; margin-top:12px;}
-  .btn:active{ transform:scale(0.98);}
+  .btn{ font-family:'Noto Sans Bengali',serif; font-weight:700; letter-spacing:0.01em; font-size:15px; padding:13px 18px; border-radius:3px; border:none; cursor:pointer; width:100%; margin-top:12px; touch-action:manipulation; transition:transform .12s ease, filter .12s ease, opacity .12s ease;}
+  .btn:active{ transform:scale(0.96); filter:brightness(0.92);}
   .btn-gold{ background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:var(--navy-deep); box-shadow:0 4px 12px rgba(201,162,39,0.35);}
   .btn-nawab{ background:linear-gradient(180deg, var(--nawab-bright), var(--nawab)); color:#EDF3EA;}
   .btn-eic{ background:linear-gradient(180deg, var(--eic-bright), var(--eic)); color:#F5E7E7;}
   .btn-outline{ background:transparent; border:1px solid rgba(42,33,23,0.35); color:var(--ink);}
   .btn:disabled{ opacity:0.4; cursor:not-allowed;}
+  .btn:disabled.is-loading{ opacity:0.75; cursor:progress;}
+  .btn-spin{ display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-1px; border:2px solid currentColor; border-right-color:transparent; border-bottom-color:transparent; border-radius:50%; opacity:0.85; animation:spin 0.6s linear infinite;}
   .btn-row{ display:flex; gap:10px;}
   .btn-row .btn{ margin-top:0;}
   .code-display{ text-align:center; font-family:'Cinzel',serif; font-size:38px; letter-spacing:0.25em; color:var(--gold); background:rgba(201,162,39,0.08); border:1px dashed var(--gold); border-radius:6px; padding:16px; margin:12px 0;}
@@ -71,8 +73,10 @@
   .map-card.current{ box-shadow:0 0 0 3px rgba(201,162,39,0.4);}
   .scoreline{ text-align:center; font-size:13.5px; color:var(--gold-bright); margin-bottom:14px; font-family:'Noto Sans Bengali',serif;}
   .seal-wrap{ display:flex; justify-content:center; margin:22px 0 8px;}
-  .seal{ width:150px; height:150px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; background:radial-gradient(circle at 35% 30%, #d8c894, var(--gold) 55%, #8a6d15 100%); box-shadow:0 10px 26px rgba(0,0,0,0.5), inset 0 0 0 6px rgba(0,0,0,0.15); position:relative; transition:transform 0.35s cubic-bezier(.2,.9,.3,1.3); transform-style:preserve-3d;}
+  .seal{ width:150px; height:150px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; background:radial-gradient(circle at 35% 30%, #d8c894, var(--gold) 55%, #8a6d15 100%); box-shadow:0 10px 26px rgba(0,0,0,0.5), inset 0 0 0 6px rgba(0,0,0,0.15); position:relative; transition:transform 0.2s cubic-bezier(.2,.9,.3,1.3); transform-style:preserve-3d; touch-action:manipulation;}
+  .seal:active{ transform:scale(0.95);}
   .seal.flipped{ transform:rotateY(180deg);}
+  .seal.flipped:active{ transform:rotateY(180deg);}
   .seal-face{ position:absolute; inset:0; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column; backface-visibility:hidden; font-family:'Tiro Bangla',serif; text-align:center; padding:10px;}
   .seal-front{ color:var(--navy-deep); font-size:14px;}
   .seal-back{ transform:rotateY(180deg); color:#fff;}
@@ -81,8 +85,9 @@
   .seal-back .char-name{ font-size:18px; margin-bottom:6px;}
   .seal-back .team-name{ font-size:12px; letter-spacing:0.05em;}
   .chip-grid{ display:flex; flex-wrap:wrap; gap:8px; margin:12px 0;}
-  .chip{ padding:9px 14px; border-radius:20px; border:1.5px solid rgba(42,33,23,0.3); background:#F7F0DE; font-family:'Noto Sans Bengali',serif; font-size:15px; cursor:pointer; color:var(--ink);}
+  .chip{ padding:9px 14px; border-radius:20px; border:1.5px solid rgba(42,33,23,0.3); background:#F7F0DE; font-family:'Noto Sans Bengali',serif; font-size:15px; cursor:pointer; color:var(--ink); touch-action:manipulation; transition:transform .12s ease, filter .12s ease, opacity .12s ease;}
   .chip.selected{ background:var(--gold); border-color:var(--gold); color:var(--navy-deep); font-weight:700;}
+  .chip:active{ transform:scale(0.94); filter:brightness(0.95);}
   .result-banner{ text-align:center; padding:16px; border-radius:4px; margin:12px 0; font-family:'Tiro Bangla',serif; font-size:18px;}
   .result-banner.nawab{ background:rgba(47,82,51,0.18); border:1px solid var(--nawab-bright); color:var(--nawab);}
   .result-banner.eic{ background:rgba(122,46,46,0.18); border:1px solid var(--eic-bright); color:var(--eic);}
@@ -101,6 +106,11 @@
 <div id="app"></div>
 
 <script>
+// iOS Safari only applies :active styles to elements while a touch listener
+// exists somewhere in the ancestor chain -- without this, tap feedback on
+// .btn/.chip/.seal silently never fires on iPhone.
+document.addEventListener('touchstart', function(){}, {passive:true});
+
 /* ============ FIXED 5-PLAYER ROLE SET (confirmed against physical rulebook) ============ */
 const NAWAB_ROLES = [
   {id:'siraj', bn:'নবাব সিরাজউদ্দৌলা'},
@@ -273,6 +283,51 @@ function freshGame(){
   };
 }
 
+// Runs a mutateRoom-backed action for a .btn click: disables the button and
+// swaps in a spinner the instant it's tapped, so there's never a dead gap
+// while the Firebase write is in flight. On success mutateRoom's own render()
+// replaces this button entirely (no-op restore below); on failure/error we
+// put the button back so the player can retry.
+async function submitAction(btn, action){
+  if(btn.disabled) return;
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.classList.add('is-loading');
+  btn.innerHTML = `<span class="btn-spin"></span>${btn.dataset.loadingLabel || '…'}`;
+  let result;
+  try{
+    result = await action();
+  }catch(e){
+    result = null;
+  }
+  if(result === null && document.body.contains(btn)){
+    btn.disabled = false;
+    btn.classList.remove('is-loading');
+    btn.innerHTML = original;
+  }
+}
+
+// Same idea as submitAction but for a .chip in a selection grid (endgame
+// guess): dims the other chips, marks the tapped one as busy, and restores
+// the whole grid on failure so the player can pick again.
+async function submitChipAction(chip, allChips, action){
+  if(chip.dataset.loading) return;
+  const original = chip.textContent;
+  allChips.forEach(c=>{ c.style.pointerEvents='none'; c.style.opacity = (c===chip ? '1' : '0.45'); });
+  chip.dataset.loading = '1';
+  chip.textContent = original + ' …';
+  let result;
+  try{
+    result = await action();
+  }catch(e){
+    result = null;
+  }
+  if(result === null && document.body.contains(chip)){
+    allChips.forEach(c=>{ c.style.pointerEvents=''; c.style.opacity=''; delete c.dataset.loading; });
+    chip.textContent = original;
+  }
+}
+
 /* ============ APP / CLIENT STATE (local only, not shared) ============ */
 const client = {
   role: null,       // null | 'host' | 'player'
@@ -334,12 +389,14 @@ SCREENS.landing = function(){
   hostStatus.style.display='none';
   hostBtn.onclick = async ()=>{
     hostBtn.disabled = true;
-    hostBtn.textContent = 'তৈরি করা হচ্ছে...';
+    hostBtn.classList.add('is-loading');
+    hostBtn.innerHTML = '<span class="btn-spin"></span>তৈরি করা হচ্ছে...';
     hostStatus.style.display='none';
     const code = randomCode();
     const ok = await saveRoom(code, {players:[], game: freshGame()});
     if(!ok){
       hostBtn.disabled = false;
+      hostBtn.classList.remove('is-loading');
       hostBtn.textContent = 'রুম তৈরি করুন';
       hostStatus.style.display='block';
       hostStatus.innerHTML = `<strong>রুম তৈরি করা যায়নি।</strong> সংযোগ সমস্যা হতে পারে (${lastStorageError || 'অজানা কারণ'})। আবার চেষ্টা করুন।`;
@@ -369,6 +426,7 @@ SCREENS.landing = function(){
   joinStatus.style.display='none';
   const showJoinError = (msg)=>{
     joinBtn.disabled = false;
+    joinBtn.classList.remove('is-loading');
     joinBtn.textContent = 'যোগ দিন';
     joinStatus.style.display='block';
     joinStatus.innerHTML = msg;
@@ -379,7 +437,8 @@ SCREENS.landing = function(){
     joinStatus.style.display='none';
     if(!name || !code){ showJoinError('নাম ও কোড দুটোই দিন।'); return; }
     joinBtn.disabled = true;
-    joinBtn.textContent = 'যোগ দেওয়া হচ্ছে...';
+    joinBtn.classList.add('is-loading');
+    joinBtn.innerHTML = '<span class="btn-spin"></span>যোগ দেওয়া হচ্ছে...';
     const room = await loadRoom(code);
     if(!room){
       showJoinError(`<strong>এই কোডে কোনো রুম পাওয়া যায়নি।</strong> কোড ঠিক আছে কিনা দেখুন, অথবা সংযোগ সমস্যা হতে পারে (${lastStorageError || 'কোড ভুল হতে পারে'})।`);
@@ -491,12 +550,12 @@ PHASE.lobby = function(room){
     card.appendChild(note);
     const btn = el('button','btn btn-gold', `ভূমিকা বণ্টন করে খেলা শুরু করুন (${room.players.length}/${NUM_PLAYERS})`);
     btn.disabled = room.players.length !== NUM_PLAYERS;
-    btn.onclick = async ()=>{
+    btn.onclick = ()=> submitAction(btn, ()=>{
       const roleList = shuffle([
         ...NAWAB_ROLES.map(r=>({team:'nawab', roleId:r.id, bn:r.bn})),
         ...EIC_ROLES.map(r=>({team:'eic', roleId:r.id, bn:r.bn})),
       ]);
-      await mutateRoom(client.roomCode, (r)=>{
+      return mutateRoom(client.roomCode, (r)=>{
         const order = shuffle(r.players.map(p=>p.name));
         const roles = {};
         order.forEach((name,i)=>{ roles[name] = roleList[i]; });
@@ -506,7 +565,7 @@ PHASE.lobby = function(room){
         r.game.phase = 'reveal';
         return r;
       });
-    };
+    });
     card.appendChild(btn);
   }
   wrap.appendChild(card);
@@ -533,12 +592,10 @@ PHASE.reveal = function(room){
     card.appendChild(roster);
     const btn = el('button','btn btn-gold', `অধ্যায় ১ শুরু করুন (${readyCount}/${NUM_PLAYERS})`);
     btn.disabled = readyCount !== NUM_PLAYERS;
-    btn.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{
-        r.game.phase='propose';
-        return r;
-      });
-    };
+    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
+      r.game.phase='propose';
+      return r;
+    }));
     card.appendChild(btn);
     wrap.appendChild(card);
     return wrap;
@@ -586,14 +643,15 @@ PHASE.reveal = function(room){
       card.appendChild(box);
     }
     const btn = el('button','btn btn-outline','মনে রেখেছি — প্রস্তুত');
-    btn.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{
+    btn.onclick = ()=> submitAction(btn, async ()=>{
+      const result = await mutateRoom(client.roomCode, (r)=>{
         r.game.readyReveal = r.game.readyReveal || {};
         r.game.readyReveal[client.myName] = true;
         return r;
       });
       client._sealFlipped = false;
-    };
+      return result;
+    });
     card.appendChild(btn);
   }
   wrap.appendChild(card);
@@ -634,15 +692,16 @@ PHASE.propose = function(room){
 
   const btn = el('button','btn btn-gold', `দল চূড়ান্ত করুন (${selected.length}/${teamSize})`);
   btn.disabled = selected.length !== teamSize;
-  btn.onclick = async ()=>{
-    await mutateRoom(client.roomCode, (r)=>{
+  btn.onclick = ()=> submitAction(btn, async ()=>{
+    const result = await mutateRoom(client.roomCode, (r)=>{
       r.game.selectedTeam = selected;
       r.game.votes = {};
       r.game.phase = 'vote';
       return r;
     });
     client._selectedTeam = [];
-  };
+    return result;
+  });
   card.appendChild(btn);
   wrap.appendChild(card);
   return wrap;
@@ -663,8 +722,7 @@ PHASE.vote = function(room){
     card.appendChild(el('p', `ভোট জমা পড়েছে: ${voteCount}/${NUM_PLAYERS}`));
     const btn = el('button','btn btn-gold','ভোটের ফলাফল প্রকাশ করুন');
     btn.disabled = voteCount !== NUM_PLAYERS;
-    btn.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{
+    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
         const approvals = Object.values(r.game.votes).filter(v=>v==='approve').length;
         const rejections = Object.values(r.game.votes).filter(v=>v==='reject').length;
         const approved = approvals > rejections;
@@ -685,8 +743,7 @@ PHASE.vote = function(room){
           }
         }
         return r;
-      });
-    };
+      }));
     card.appendChild(btn);
     wrap.appendChild(card);
     return wrap;
@@ -699,21 +756,17 @@ PHASE.vote = function(room){
   } else {
     const row = el('div','btn-row');
     const approveBtn = el('button','btn btn-nawab','অনুমোদন');
-    approveBtn.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{
+    approveBtn.onclick = ()=> submitAction(approveBtn, ()=> mutateRoom(client.roomCode, (r)=>{
         r.game.votes = r.game.votes || {};
         r.game.votes[client.myName] = 'approve';
         return r;
-      });
-    };
+      }));
     const rejectBtn = el('button','btn btn-eic','প্রত্যাখ্যান');
-    rejectBtn.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{
+    rejectBtn.onclick = ()=> submitAction(rejectBtn, ()=> mutateRoom(client.roomCode, (r)=>{
         r.game.votes = r.game.votes || {};
         r.game.votes[client.myName] = 'reject';
         return r;
-      });
-    };
+      }));
     row.appendChild(approveBtn); row.appendChild(rejectBtn);
     card.appendChild(row);
   }
@@ -736,16 +789,14 @@ PHASE.mission = function(room){
     card.appendChild(el('p', `কার্ড জমা পড়েছে: ${playedCount}/${needed}`));
     const btn = el('button','btn btn-gold','অধ্যায়ের ফলাফল প্রকাশ করুন');
     btn.disabled = playedCount !== needed;
-    btn.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{
+    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
         const betrayals = Object.values(r.game.missionCards).filter(v=>v==='betray').length;
         const outcome = betrayals >= 1 ? 'eic' : 'nawab';
         r.game.chapterResults[r.game.chapterIdx] = outcome;
         r.game._lastBetrayals = betrayals;
         r.game.phase = 'chapterResult';
         return r;
-      });
-    };
+      }));
     card.appendChild(btn);
     wrap.appendChild(card);
     return wrap;
@@ -771,33 +822,27 @@ PHASE.mission = function(room){
   if(myTeam==='nawab'){
     card.appendChild(el('p','নবাবের প্রতি অনুগত হিসেবে আপনি কেবল "সফল" খেলতে পারেন।'));
     const btn = el('button','btn btn-nawab','সফল খেলুন');
-    btn.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{
+    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
         r.game.missionCards = r.game.missionCards || {};
         r.game.missionCards[client.myName] = 'success';
         return r;
-      });
-    };
+      }));
     card.appendChild(btn);
   } else {
     card.appendChild(el('p','EIC এজেন্ট হিসেবে সতর্কভাবে বাছাই করুন — বিশ্বাসঘাতকতা প্রকাশ্য নয়, কিন্তু সন্দেহজনক হতে পারে।'));
     const row = el('div','btn-row');
     const s1 = el('button','btn btn-nawab','সফল');
-    s1.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{
+    s1.onclick = ()=> submitAction(s1, ()=> mutateRoom(client.roomCode, (r)=>{
         r.game.missionCards = r.game.missionCards || {};
         r.game.missionCards[client.myName] = 'success';
         return r;
-      });
-    };
+      }));
     const s2 = el('button','btn btn-eic','বিশ্বাসঘাতক');
-    s2.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{
+    s2.onclick = ()=> submitAction(s2, ()=> mutateRoom(client.roomCode, (r)=>{
         r.game.missionCards = r.game.missionCards || {};
         r.game.missionCards[client.myName] = 'betray';
         return r;
-      });
-    };
+      }));
     row.appendChild(s1); row.appendChild(s2);
     card.appendChild(row);
   }
@@ -826,29 +871,22 @@ PHASE.chapterResult = function(room){
   if(wins.eic >= 3){
     card.appendChild(el('p','EIC পক্ষ ৩টি অধ্যায় জিতে ফেলেছে — খেলা EIC-র জয়ে শেষ।'));
     const btn = el('button','btn btn-gold','চূড়ান্ত ফলাফল দেখুন');
-    btn.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{ r.game.winner='eic'; r.game.phase='gameOver'; return r; });
-    };
+    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{ r.game.winner='eic'; r.game.phase='gameOver'; return r; }));
     card.appendChild(btn);
   } else if(wins.nawab >= 3){
     card.appendChild(el('p','নবাব পক্ষ ৩টি অধ্যায় জিতেছে! কিন্তু EIC পক্ষের শেষ সুযোগ বাকি — তারা যদি সঠিকভাবে মীর মদনকে চিহ্নিত করতে পারে, তবে জয় ছিনিয়ে নেবে।'));
     const btn = el('button','btn btn-gold','EIC-র চূড়ান্ত অনুমান পর্বে যান');
-    btn.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{ r.game.phase='endgameGuess'; return r; });
-    };
+    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{ r.game.phase='endgameGuess'; return r; }));
     card.appendChild(btn);
   } else if(game.chapterIdx >= 4){
     // shouldn't normally happen (someone should have 3 by chapter 5) but guard anyway
     const winner = wins.nawab>wins.eic ? 'nawab':'eic';
     const btn = el('button','btn btn-gold','চূড়ান্ত ফলাফল দেখুন');
-    btn.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{ r.game.winner=winner; r.game.phase='gameOver'; return r; });
-    };
+    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{ r.game.winner=winner; r.game.phase='gameOver'; return r; }));
     card.appendChild(btn);
   } else {
     const btn = el('button','btn btn-gold', `অধ্যায় ${game.chapterIdx+2}-এ যান`);
-    btn.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{
+    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
         r.game.chapterIdx += 1;
         r.game.proposerIdx = (r.game.proposerIdx+1) % NUM_PLAYERS;
         r.game.selectedTeam = [];
@@ -857,8 +895,7 @@ PHASE.chapterResult = function(room){
         r.game.missionCards = {};
         r.game.phase = 'propose';
         return r;
-      });
-    };
+      }));
     card.appendChild(btn);
   }
   wrap.appendChild(card);
@@ -877,15 +914,13 @@ PHASE.endgameGuess = function(room){
     card.appendChild(el('div','waiting-box', `<div class="spinner"></div><p>অনুমান জমা হয়েছে (${game.eicGuess})। ফলাফলের অপেক্ষায়...</p>`));
     if(client.role==='host'){
       const btn = el('button','btn btn-gold','চূড়ান্ত ফলাফল প্রকাশ করুন');
-      btn.onclick = async ()=>{
-        await mutateRoom(client.roomCode, (r)=>{
+      btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
           const guessedRole = r.game.roles[r.game.eicGuess];
           const correct = guessedRole && guessedRole.roleId === 'mirmodon';
           r.game.winner = correct ? 'eic' : 'nawab';
           r.game.phase = 'gameOver';
           return r;
-        });
-      };
+        }));
       card.appendChild(btn);
     }
     wrap.appendChild(card);
@@ -896,15 +931,15 @@ PHASE.endgameGuess = function(room){
   if(client.role==='player' && myTeam==='eic'){
     card.appendChild(el('p','আপনার দলের সাথে আলোচনা করে ঠিক করুন কে মীর মদন, তারপর বেছে নিন:'));
     const grid = el('div','chip-grid');
+    const chips = [];
     game.playersOrder.forEach(name=>{
       if(game.roles[name].team==='eic') return; // can't guess a fellow EIC agent
       const chip = el('div','chip', name);
-      chip.onclick = async ()=>{
-        await mutateRoom(client.roomCode, (r)=>{
+      chip.onclick = ()=> submitChipAction(chip, chips, ()=> mutateRoom(client.roomCode, (r)=>{
           if(!r.game.eicGuess) r.game.eicGuess = name;
           return r;
-        });
-      };
+        }));
+      chips.push(chip);
       grid.appendChild(chip);
     });
     card.appendChild(grid);
@@ -938,12 +973,10 @@ PHASE.gameOver = function(room){
 
   if(client.role==='host'){
     const btn = el('button','btn btn-gold','নতুন খেলা শুরু করুন (একই কোড)');
-    btn.onclick = async ()=>{
-      await mutateRoom(client.roomCode, (r)=>{
+    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
         r.game = freshGame();
         return r;
-      });
-    };
+      }));
     card.appendChild(btn);
   }
   wrap.appendChild(card);
