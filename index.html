@@ -71,7 +71,7 @@
   .map-card.current{ box-shadow:0 0 0 3px rgba(201,162,39,0.4);}
   .scoreline{ text-align:center; font-size:13.5px; color:var(--gold-bright); margin-bottom:14px; font-family:'Noto Sans Bengali',serif;}
   .seal-wrap{ display:flex; justify-content:center; margin:22px 0 8px;}
-  .seal{ width:150px; height:150px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; background:radial-gradient(circle at 35% 30%, #d8c894, var(--gold) 55%, #8a6d15 100%); box-shadow:0 10px 26px rgba(0,0,0,0.5), inset 0 0 0 6px rgba(0,0,0,0.15); position:relative; transition:transform 0.35s cubic-bezier(.2,.9,.3,1.3);}
+  .seal{ width:150px; height:150px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; background:radial-gradient(circle at 35% 30%, #d8c894, var(--gold) 55%, #8a6d15 100%); box-shadow:0 10px 26px rgba(0,0,0,0.5), inset 0 0 0 6px rgba(0,0,0,0.15); position:relative; transition:transform 0.35s cubic-bezier(.2,.9,.3,1.3); transform-style:preserve-3d;}
   .seal.flipped{ transform:rotateY(180deg);}
   .seal-face{ position:absolute; inset:0; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column; backface-visibility:hidden; font-family:'Tiro Bangla',serif; text-align:center; padding:10px;}
   .seal-front{ color:var(--navy-deep); font-size:14px;}
@@ -546,6 +546,12 @@ PHASE.reveal = function(room){
 
   // player view
   const myRole = game.roles[client.myName];
+  if(!myRole || !myRole.team){
+    console.error('PHASE.reveal: missing role/team for player', client.myName, 'roles=', game.roles);
+    card.appendChild(el('div','note-box', `<strong>ত্রুটি:</strong> আপনার ভূমিকা খুঁজে পাওয়া যায়নি (${client.myName})। পাতাটি রিফ্রেশ করুন অথবা হোস্টকে জানান।`));
+    wrap.appendChild(card);
+    return wrap;
+  }
   const alreadyReady = game.readyReveal && game.readyReveal[client.myName];
 
   if(alreadyReady){
