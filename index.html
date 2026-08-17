@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>পলাশী — অনলাইন সংস্করণ</title>
+<title>পলাশী - অনলাইন সংস্করণ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -220,7 +220,7 @@ async function withRetry(fn, attempts=4, baseDelay=350){
   throw lastErr;
 }
 
-// Firebase Realtime Database REST API — replaces Claude artifact's window.storage
+// Firebase Realtime Database REST API - replaces Claude artifact's window.storage
 // so this game can run as a normal hosted webpage (e.g. GitHub Pages) instead of
 // only inside Claude.ai. Rooms are stored at {FIREBASE_DB_URL}/rooms/{code}.json
 const FIREBASE_DB_URL = 'https://polashi-game-default-rtdb.asia-southeast1.firebasedatabase.app';
@@ -464,7 +464,7 @@ function startPolling(){
       render();
       return;
     }
-    // Don't blank out a screen we already had just because one poll hiccuped —
+    // Don't blank out a screen we already had just because one poll hiccuped -
     // keep showing the last known state and surface a small connection notice instead.
     if(room !== null || !client.room){
       client.room = room;
@@ -491,7 +491,7 @@ function resetClientToLanding(){
 
 function connectionBanner(){
   if(!lastStorageError) return null;
-  const box = el('div','note-box','⚠️ সংযোগে সাময়িক সমস্যা হচ্ছে ('+lastStorageError+') — স্বয়ংক্রিয়ভাবে আবার চেষ্টা করা হচ্ছে।');
+  const box = el('div','note-box','⚠️ সংযোগে সাময়িক সমস্যা হচ্ছে ('+lastStorageError+') - স্বয়ংক্রিয়ভাবে আবার চেষ্টা করা হচ্ছে।');
   box.style.borderColor = 'var(--eic-bright)';
   return box;
 }
@@ -506,21 +506,21 @@ const RULEBOOK_TABS = [
 ];
 const RULEBOOK_CHARACTERS = [
   {name:'মীর মদন', team:'nawab', group:'always', tag:'সর্বদা উপস্থিত',
-   text:'পলাশীর যুদ্ধের সেই বীর সেনাপতি, যিনি ইংরেজদের বিরুদ্ধে সবচেয়ে সাহসী লড়াই করেছিলেন। এই খেলায় তিনি নবাব পক্ষের একমাত্র মানুষ যিনি জানেন কারা EIC পক্ষে আছে — খেলা শুরুর সময়ই তিনি তাদের চিনে নেন। কিন্তু সাবধান — যদি রায় দুর্লভ খেলায় থাকেন (৭+ খেলোয়াড়), তিনি তার নজর এড়িয়ে যান, তাকে মীর মদন চিনতে পারেন না।'},
+   text:'পলাশীর যুদ্ধের সেই বীর সেনাপতি, যিনি ইংরেজদের বিরুদ্ধে সবচেয়ে সাহসী লড়াই করেছিলেন। এই খেলায় তিনি নবাব পক্ষের একমাত্র মানুষ যিনি জানেন কারা EIC পক্ষে আছে - খেলা শুরুর সময়ই তিনি তাদের চিনে নেন। কিন্তু সাবধান - যদি রায় দুর্লভ খেলায় থাকেন (৭+ খেলোয়াড়), তিনি তার নজর এড়িয়ে যান, তাকে মীর মদন চিনতে পারেন না।'},
   {name:'মীর জাফর', team:'eic', group:'always', tag:'সর্বদা উপস্থিত',
-   text:'ইতিহাসের সবচেয়ে আলোচিত বিশ্বাসঘাতক। EIC পক্ষের বাকিদের মতো তিনিও খেলার শুরু থেকে তার দলের সবাইকে চেনেন। খেলার একেবারে শেষ মুহূর্তে, যদি নবাব পক্ষ তিনটি অধ্যায় জিতে ফেলে, তাহলে দলের আলোচনার পর চূড়ান্ত সিদ্ধান্তটা তাকেই নিতে হয় — কে আসল মীর মদন, তা অনুমান করে EIC পক্ষের শেষ সুযোগটা ব্যবহার করা।'},
+   text:'ইতিহাসের সবচেয়ে আলোচিত বিশ্বাসঘাতক। EIC পক্ষের বাকিদের মতো তিনিও খেলার শুরু থেকে তার দলের সবাইকে চেনেন। খেলার একেবারে শেষ মুহূর্তে, যদি নবাব পক্ষ তিনটি অধ্যায় জিতে ফেলে, তাহলে দলের আলোচনার পর চূড়ান্ত সিদ্ধান্তটা তাকেই নিতে হয় - কে আসল মীর মদন, তা অনুমান করে EIC পক্ষের শেষ সুযোগটা ব্যবহার করা।'},
   {name:'নবাব সিরাজউদ্দৌলা', team:'nawab', group:'base', tag:'মূল চরিত্র (৫+)',
-   text:'বাংলার শেষ স্বাধীন নবাব। কোনো বিশেষ ক্ষমতা নেই — একজন সাধারণ নবাব-পক্ষীয় খেলোয়াড় হিসেবেই তিনি খেলেন, বাকি সবার মতোই অন্ধকারে থেকে নিজের দলকে বিশ্বাস করার চেষ্টা করেন।'},
+   text:'বাংলার শেষ স্বাধীন নবাব। কোনো বিশেষ ক্ষমতা নেই - একজন সাধারণ নবাব-পক্ষীয় খেলোয়াড় হিসেবেই তিনি খেলেন, বাকি সবার মতোই অন্ধকারে থেকে নিজের দলকে বিশ্বাস করার চেষ্টা করেন।'},
   {name:'লুৎফুন্নেসা বেগম', team:'nawab', group:'base', tag:'মূল চরিত্র (৫+)',
-   text:'নবাব সিরাজউদ্দৌলার স্ত্রী। তারও কোনো বিশেষ ক্ষমতা নেই — একজন সাধারণ নবাব-পক্ষীয় সদস্য হিসেবেই খেলেন।'},
+   text:'নবাব সিরাজউদ্দৌলার স্ত্রী। তারও কোনো বিশেষ ক্ষমতা নেই - একজন সাধারণ নবাব-পক্ষীয় সদস্য হিসেবেই খেলেন।'},
   {name:'ঘসেটি বেগম', team:'eic', group:'base', tag:'মূল চরিত্র (৫+)',
-   text:'আলীবর্দী খাঁর কন্যা এবং সিরাজউদ্দৌলার বিরুদ্ধে ষড়যন্ত্রকারীদের একজন। তার একটি বিশেষ, ছলনাপূর্ণ ক্ষমতা আছে — যদি মোহন লাল খেলায় থাকেন (৬+ খেলোয়াড়), তিনি নিজেকে মীর মদন হিসেবে দেখাতে পারেন, যার ফলে মোহন লাল বিভ্রান্ত হয়ে পড়েন সত্যিকারের মীর মদন কে তা নিয়ে।'},
+   text:'আলীবর্দী খাঁর কন্যা এবং সিরাজউদ্দৌলার বিরুদ্ধে ষড়যন্ত্রকারীদের একজন। তার একটি বিশেষ, ছলনাপূর্ণ ক্ষমতা আছে - যদি মোহন লাল খেলায় থাকেন (৬+ খেলোয়াড়), তিনি নিজেকে মীর মদন হিসেবে দেখাতে পারেন, যার ফলে মোহন লাল বিভ্রান্ত হয়ে পড়েন সত্যিকারের মীর মদন কে তা নিয়ে।'},
   {name:'মোহন লাল', team:'nawab', group:'special', tag:'৬+ খেলোয়াড়ের খেলায় যুক্ত হন',
-   text:'সিরাজউদ্দৌলার প্রতি অবিচল বিশ্বস্ত এক সেনাপতি, যিনি যুদ্ধক্ষেত্রে বীরের মতো লড়ে প্রাণ দিয়েছিলেন। এই খেলায় তিনি মীর মদনকে খুঁজে বের করার চেষ্টা করেন — কিন্তু ঘসেটি বেগম যদি খেলায় থাকেন, তিনি দুজনের নাম দেখেন (আসল মীর মদন + ঘসেটি বেগম), কোনটা কে তা না জানিয়েই। তাকে অনুমান করে বুঝে নিতে হয় কে সত্যিকারের মীর মদন।'},
+   text:'সিরাজউদ্দৌলার প্রতি অবিচল বিশ্বস্ত এক সেনাপতি, যিনি যুদ্ধক্ষেত্রে বীরের মতো লড়ে প্রাণ দিয়েছিলেন। এই খেলায় তিনি মীর মদনকে খুঁজে বের করার চেষ্টা করেন - কিন্তু ঘসেটি বেগম যদি খেলায় থাকেন, তিনি দুজনের নাম দেখেন (আসল মীর মদন + ঘসেটি বেগম), কোনটা কে তা না জানিয়েই। তাকে অনুমান করে বুঝে নিতে হয় কে সত্যিকারের মীর মদন।'},
   {name:'রায় দুর্লভ', team:'eic', group:'special', tag:'৭+ খেলোয়াড়ের খেলায় যুক্ত হন',
-   text:'ইতিহাসে তিনি ছিলেন সিরাজউদ্দৌলার বিরুদ্ধে অন্যতম ষড়যন্ত্রকারী, যুদ্ধক্ষেত্রে নীরব দর্শকের মতো দাঁড়িয়ে থেকেছিলেন। এই খেলায় তার বিশেষত্ব হলো — তিনি মীর মদনের নজর এড়িয়ে যান। অর্থাৎ মীর মদন EIC পক্ষের বাকিদের চিনলেও, রায় দুর্লভকে তিনি চিনতে পারেন না।'},
+   text:'ইতিহাসে তিনি ছিলেন সিরাজউদ্দৌলার বিরুদ্ধে অন্যতম ষড়যন্ত্রকারী, যুদ্ধক্ষেত্রে নীরব দর্শকের মতো দাঁড়িয়ে থেকেছিলেন। এই খেলায় তার বিশেষত্ব হলো - তিনি মীর মদনের নজর এড়িয়ে যান। অর্থাৎ মীর মদন EIC পক্ষের বাকিদের চিনলেও, রায় দুর্লভকে তিনি চিনতে পারেন না।'},
   {name:'সেইন্ট ফ্রে', team:'nawab', group:'special', tag:'৮+ খেলোয়াড়ের খেলায় যুক্ত হন',
-   text:'নবাবের পক্ষে যুদ্ধ করা একজন ফরাসি সেনাপতি, যিনি শেষ পর্যন্ত মোহন লালের পাশে থেকে লড়েছিলেন। এই খেলায় কোনো বিশেষ ক্ষমতা নেই — একজন অতিরিক্ত নবাব-পক্ষীয় সদস্য হিসেবেই যুক্ত হন, যখন খেলোয়াড় সংখ্যা বেড়ে যায়।'},
+   text:'নবাবের পক্ষে যুদ্ধ করা একজন ফরাসি সেনাপতি, যিনি শেষ পর্যন্ত মোহন লালের পাশে থেকে লড়েছিলেন। এই খেলায় কোনো বিশেষ ক্ষমতা নেই - একজন অতিরিক্ত নবাব-পক্ষীয় সদস্য হিসেবেই যুক্ত হন, যখন খেলোয়াড় সংখ্যা বেড়ে যায়।'},
   {name:'নবাব-পক্ষের অতিরিক্ত সৈনিক', team:'nawab', group:'special', tag:'৯+ খেলোয়াড়ে যুক্ত হন',
    text:'কোনো বিশেষ ক্ষমতা নেই। খেলোয়াড় সংখ্যা বাড়লে দল ভারসাম্য রাখতে আরেকজন নবাব-পক্ষীয় সদস্য প্রয়োজন হয়।'},
   {name:'EIC-পক্ষের অতিরিক্ত সৈনিক', team:'eic', group:'special', tag:'১০ খেলোয়াড়ে যুক্ত হন',
@@ -537,11 +537,11 @@ function renderCharCard(c){
 function rulebookIntroHTML(){
   return `<div class="rulebook-section">
     <h3>ভূমিকা</h3>
-    <p>পলাশী একটি সামাজিক প্রতারণার খেলা (social deduction game), যার প্রেক্ষাপট ১৭৫৭ সালের ঐতিহাসিক পলাশীর যুদ্ধ। এই যুদ্ধেই বাংলার শেষ স্বাধীন নবাব সিরাজউদ্দৌলা তার নিজের অতি বিশ্বস্ত মানুষদের বিশ্বাসঘাতকতার শিকার হয়ে ইস্ট ইন্ডিয়া কোম্পানির কাছে পরাজিত হয়েছিলেন। এই খেলায় আপনি সেই ইতিহাসই আবার বাঁচবেন — কিন্তু এবার আপনি জানেন না কে বন্ধু, আর কে শত্রু।</p>
-    <p>৫ থেকে ১০ জন খেলোয়াড় দুটি পক্ষে ভাগ হয়ে খেলবেন — নবাব পক্ষ (সবুজ) এবং ইস্ট ইন্ডিয়া কোম্পানি বা EIC পক্ষ (লাল)। প্রত্যেক খেলোয়াড়কে গোপনে একটি চরিত্র দেওয়া হবে, যা থেকেই তার পক্ষ ঠিক হবে। EIC পক্ষ নিজেদের মধ্যে একে অপরকে চিনবে, কিন্তু নবাব পক্ষের বেশিরভাগ মানুষ একেবারে অন্ধকারে থাকবেন — নিজের দলের প্রকৃত সদস্যরাও অজানা।</p>
+    <p>পলাশী একটি সামাজিক প্রতারণার খেলা (social deduction game), যার প্রেক্ষাপট ১৭৫৭ সালের ঐতিহাসিক পলাশীর যুদ্ধ। এই যুদ্ধেই বাংলার শেষ স্বাধীন নবাব সিরাজউদ্দৌলা তার নিজের অতি বিশ্বস্ত মানুষদের বিশ্বাসঘাতকতার শিকার হয়ে ইস্ট ইন্ডিয়া কোম্পানির কাছে পরাজিত হয়েছিলেন। এই খেলায় আপনি সেই ইতিহাসই আবার বাঁচবেন - কিন্তু এবার আপনি জানেন না কে বন্ধু, আর কে শত্রু।</p>
+    <p>৫ থেকে ১০ জন খেলোয়াড় দুটি পক্ষে ভাগ হয়ে খেলবেন - নবাব পক্ষ (সবুজ) এবং ইস্ট ইন্ডিয়া কোম্পানি বা EIC পক্ষ (লাল)। প্রত্যেক খেলোয়াড়কে গোপনে একটি চরিত্র দেওয়া হবে, যা থেকেই তার পক্ষ ঠিক হবে। EIC পক্ষ নিজেদের মধ্যে একে অপরকে চিনবে, কিন্তু নবাব পক্ষের বেশিরভাগ মানুষ একেবারে অন্ধকারে থাকবেন - নিজের দলের প্রকৃত সদস্যরাও অজানা।</p>
     <h3>দুই পক্ষ ও লক্ষ্য</h3>
-    <div class="team-box nawab"><strong>নবাব পক্ষ (সবুজ সীলমোহর)</strong>লক্ষ্য — পাঁচটি অধ্যায়ের মধ্যে তিনটিতে জয়লাভ করা। প্রতিটি মিশনে তাদের অবশ্যই সফলতার কার্ড খেলতে হবে — বিশ্বাসঘাতকতার কোনো সুযোগ নেই তাদের জন্য। সমস্যা হলো, তারা জানে না কে তাদেরই দলের প্রকৃত সদস্য (মীর মদন ছাড়া, যিনি বিশেষভাবে জানেন)।</div>
-    <div class="team-box eic"><strong>EIC পক্ষ (লাল সীলমোহর)</strong>লক্ষ্য — বিশ্বাসঘাতকতার মাধ্যমে নবাব পক্ষকে ব্যর্থ করে দেওয়া, অথবা টানা প্রস্তাব প্রত্যাখ্যান করিয়ে বিভ্রান্তি তৈরি করা। তারা খেলার শুরু থেকেই একে অপরকে চেনে এবং একসাথে কৌশল সাজাতে পারে — এটাই তাদের সবচেয়ে বড় সুবিধা।</div>
+    <div class="team-box nawab"><strong>নবাব পক্ষ (সবুজ সীলমোহর)</strong>লক্ষ্য - পাঁচটি অধ্যায়ের মধ্যে তিনটিতে জয়লাভ করা। প্রতিটি মিশনে তাদের অবশ্যই সফলতার কার্ড খেলতে হবে - বিশ্বাসঘাতকতার কোনো সুযোগ নেই তাদের জন্য। সমস্যা হলো, তারা জানে না কে তাদেরই দলের প্রকৃত সদস্য (মীর মদন ছাড়া, যিনি বিশেষভাবে জানেন)।</div>
+    <div class="team-box eic"><strong>EIC পক্ষ (লাল সীলমোহর)</strong>লক্ষ্য - বিশ্বাসঘাতকতার মাধ্যমে নবাব পক্ষকে ব্যর্থ করে দেওয়া, অথবা টানা প্রস্তাব প্রত্যাখ্যান করিয়ে বিভ্রান্তি তৈরি করা। তারা খেলার শুরু থেকেই একে অপরকে চেনে এবং একসাথে কৌশল সাজাতে পারে - এটাই তাদের সবচেয়ে বড় সুবিধা।</div>
   </div>`;
 }
 function rulebookCharsHTML(){
@@ -568,14 +568,14 @@ function rulebookCountsHTML(){
       <tr><th class="row-label">নবাব পক্ষ</th><td class="row-nawab">৩</td><td class="row-nawab">৪</td><td class="row-nawab">৪</td><td class="row-nawab">৫</td><td class="row-nawab">৬</td><td class="row-nawab">৬</td></tr>
       <tr><th class="row-label">EIC পক্ষ</th><td class="row-eic">২</td><td class="row-eic">২</td><td class="row-eic">৩</td><td class="row-eic">৩</td><td class="row-eic">৩</td><td class="row-eic">৪</td></tr>
     </table></div>
-    <p><strong>৫ জন:</strong> নবাব পক্ষ (৩) — নবাব সিরাজউদ্দৌলা, লুৎফুন্নেসা বেগম, মীর মদন। EIC পক্ষ (২) — মীর জাফর, ঘসেটি বেগম। সবচেয়ে সহজ ও প্রাথমিক সংস্করণ, নতুন খেলোয়াড়দের জন্য আদর্শ শুরু।</p>
-    <p><strong>৬ জন:</strong> নবাব পক্ষ (৪) — আগের তিনজনের সাথে যুক্ত হন মোহন লাল। EIC পক্ষ (২) — অপরিবর্তিত। এখান থেকেই মোহন লাল ও ঘসেটি বেগমের ছলনার খেলা শুরু হয়।</p>
-    <p><strong>৭ জন:</strong> নবাব পক্ষ (৪) — অপরিবর্তিত। EIC পক্ষ (৩) — যুক্ত হন রায় দুর্লভ, যিনি মীর মদনের চোখ এড়িয়ে যান। এই সংখ্যা থেকেই ৪র্থ অধ্যায়ে বিশেষ নিয়ম চালু হয় (নিচে দেখুন)।</p>
-    <p><strong>৮ জন:</strong> নবাব পক্ষ (৫) — যুক্ত হন সেইন্ট ফ্রে। EIC পক্ষ (৩) — অপরিবর্তিত।</p>
-    <p><strong>৯ জন:</strong> নবাব পক্ষ (৬) — যুক্ত হন একজন অতিরিক্ত সৈনিক। EIC পক্ষ (৩) — অপরিবর্তিত।</p>
-    <p><strong>১০ জন:</strong> নবাব পক্ষ (৬) — অপরিবর্তিত। EIC পক্ষ (৪) — যুক্ত হন একজন অতিরিক্ত সৈনিক। সবচেয়ে বড়, সবচেয়ে জটিল এবং সবচেয়ে উত্তেজনাপূর্ণ সংস্করণ!</p>
+    <p><strong>৫ জন:</strong> নবাব পক্ষ (৩) - নবাব সিরাজউদ্দৌলা, লুৎফুন্নেসা বেগম, মীর মদন। EIC পক্ষ (২) - মীর জাফর, ঘসেটি বেগম। সবচেয়ে সহজ ও প্রাথমিক সংস্করণ, নতুন খেলোয়াড়দের জন্য আদর্শ শুরু।</p>
+    <p><strong>৬ জন:</strong> নবাব পক্ষ (৪) - আগের তিনজনের সাথে যুক্ত হন মোহন লাল। EIC পক্ষ (২) - অপরিবর্তিত। এখান থেকেই মোহন লাল ও ঘসেটি বেগমের ছলনার খেলা শুরু হয়।</p>
+    <p><strong>৭ জন:</strong> নবাব পক্ষ (৪) - অপরিবর্তিত। EIC পক্ষ (৩) - যুক্ত হন রায় দুর্লভ, যিনি মীর মদনের চোখ এড়িয়ে যান। এই সংখ্যা থেকেই ৪র্থ অধ্যায়ে বিশেষ নিয়ম চালু হয় (নিচে দেখুন)।</p>
+    <p><strong>৮ জন:</strong> নবাব পক্ষ (৫) - যুক্ত হন সেইন্ট ফ্রে। EIC পক্ষ (৩) - অপরিবর্তিত।</p>
+    <p><strong>৯ জন:</strong> নবাব পক্ষ (৬) - যুক্ত হন একজন অতিরিক্ত সৈনিক। EIC পক্ষ (৩) - অপরিবর্তিত।</p>
+    <p><strong>১০ জন:</strong> নবাব পক্ষ (৬) - অপরিবর্তিত। EIC পক্ষ (৪) - যুক্ত হন একজন অতিরিক্ত সৈনিক। সবচেয়ে বড়, সবচেয়ে জটিল এবং সবচেয়ে উত্তেজনাপূর্ণ সংস্করণ!</p>
     <h3>অধ্যায় অনুযায়ী দলের আকার</h3>
-    <p>প্রতিটি অধ্যায়ে দলের আকার খেলোয়াড় সংখ্যার উপর নির্ভর করে বদলে যায় — এবং মজার ব্যাপার হলো, দলের আকার সবসময় বাড়তেই থাকে না, মাঝেমধ্যে ছোটও হয়ে যায়, যা খেলাকে আরও অনিশ্চিত করে তোলে।</p>
+    <p>প্রতিটি অধ্যায়ে দলের আকার খেলোয়াড় সংখ্যার উপর নির্ভর করে বদলে যায় - এবং মজার ব্যাপার হলো, দলের আকার সবসময় বাড়তেই থাকে না, মাঝেমধ্যে ছোটও হয়ে যায়, যা খেলাকে আরও অনিশ্চিত করে তোলে।</p>
     <div style="overflow-x:auto;"><table class="rulebook-table">
       <tr><th>প্লেয়ার সংখ্যা</th><th>৫</th><th>৬</th><th>৭</th><th>৮</th><th>৯</th><th>১০</th></tr>
       <tr><th class="row-label">১ম অধ্যায়</th><td>২</td><td>২</td><td>২</td><td>৩</td><td>৩</td><td>৩</td></tr>
@@ -584,7 +584,7 @@ function rulebookCountsHTML(){
       <tr><th class="row-label">৪র্থ অধ্যায়</th><td>৩</td><td>৩</td><td>৪*</td><td>৫*</td><td>৫*</td><td>৫*</td></tr>
       <tr><th class="row-label">৫ম অধ্যায়</th><td>৩</td><td>৪</td><td>৪</td><td>৬</td><td>৬</td><td>৬</td></tr>
     </table></div>
-    <div class="rulebook-note"><strong>তারকাচিহ্নিত (*) ঘরের বিশেষ নিয়ম:</strong> ৭ বা তার বেশি খেলোয়াড়ের খেলায়, ৪র্থ অধ্যায়ে EIC পক্ষের জয়ের জন্য অন্তত ২টি বিশ্বাসঘাতক কার্ড প্রয়োজন — শুধু ১টি কার্ডে এই একটি অধ্যায়ে নবাব পক্ষই জয়ী হবে। বাকি সব অধ্যায়ে, এবং ৫-৬ খেলোয়াড়ের খেলায় ৪র্থ অধ্যায়েও, স্বাভাবিক নিয়মই চলে — একটি বিশ্বাসঘাতক কার্ডই EIC পক্ষের জয়ের জন্য যথেষ্ট।</div>
+    <div class="rulebook-note"><strong>তারকাচিহ্নিত (*) ঘরের বিশেষ নিয়ম:</strong> ৭ বা তার বেশি খেলোয়াড়ের খেলায়, ৪র্থ অধ্যায়ে EIC পক্ষের জয়ের জন্য অন্তত ২টি বিশ্বাসঘাতক কার্ড প্রয়োজন - শুধু ১টি কার্ডে এই একটি অধ্যায়ে নবাব পক্ষই জয়ী হবে। বাকি সব অধ্যায়ে, এবং ৫-৬ খেলোয়াড়ের খেলায় ৪র্থ অধ্যায়েও, স্বাভাবিক নিয়মই চলে - একটি বিশ্বাসঘাতক কার্ডই EIC পক্ষের জয়ের জন্য যথেষ্ট।</div>
   </div>`;
 }
 function rulebookFlowHTML(){
@@ -593,14 +593,14 @@ function rulebookFlowHTML(){
     <ol class="step-list">
       <li>হোস্ট খেলোয়াড় সংখ্যা (৫-১০) বেছে নেবেন এবং রুম তৈরি করবেন।</li>
       <li>সবাই রুম কোড দিয়ে যোগ দেবেন।</li>
-      <li>সবাই যোগ দিলে হোস্ট "ভূমিকা বণ্টন" চাপবেন — প্রত্যেকের ফোনে গোপনে একটি চরিত্র দেখানো হবে।</li>
+      <li>সবাই যোগ দিলে হোস্ট "ভূমিকা বণ্টন" চাপবেন - প্রত্যেকের ফোনে গোপনে একটি চরিত্র দেখানো হবে।</li>
       <li>প্রত্যেকে নিজের চরিত্র মনে রাখবেন। EIC পক্ষ নিজেদের মধ্যে একে অপরকে দেখতে পাবে, আর মীর মদন দেখতে পাবেন কারা EIC পক্ষে (রায় দুর্লভ ছাড়া, যদি তিনি খেলায় থাকেন)। মোহন লাল থাকলে তিনি মীর মদন খুঁজে বের করার একটা সূত্র পাবেন।</li>
     </ol>
     <h3>অধ্যায় পর্ব (প্রতি রাউন্ডে যা ঘটে)</h3>
     <ol class="step-list">
       <li><strong>দল গঠন:</strong> বর্তমান সেনাপতি (প্রতি অধ্যায়ে বদলায়) নির্দিষ্ট সংখ্যক সদস্য নিয়ে একটি দল প্রস্তাব করবেন (কতজন লাগবে তা উপরের টেবিল অনুযায়ী)।</li>
-      <li><strong>ভোট:</strong> সবাই গোপনে হ্যাঁ/না ভোট দেবেন। বেশি হ্যাঁ ভোট পেলে দল গঠিত হবে এবং মিশনে যাবে। নাহলে পরবর্তী খেলোয়াড় নতুন সেনাপতি হয়ে আবার চেষ্টা করবেন। মনে রাখবেন — একই অধ্যায়ে টানা ৫ বার প্রস্তাব ব্যর্থ হলে EIC পক্ষ সাথে সাথেই পুরো খেলা জিতে যাবে, তাই একেবারে অকারণে বারবার প্রত্যাখ্যান করা বিপজ্জনক!</li>
-      <li><strong>মিশন:</strong> দলের সদস্যরা গোপনে সফলতা বা বিশ্বাসঘাতকতার কার্ড খেলবেন। নবাব পক্ষকে সবসময় সফলতার কার্ড খেলতে হয় — তাদের কোনো উপায় নেই। EIC পক্ষ ইচ্ছামতো যেকোনোটি খেলতে পারে।</li>
+      <li><strong>ভোট:</strong> সবাই গোপনে হ্যাঁ/না ভোট দেবেন। বেশি হ্যাঁ ভোট পেলে দল গঠিত হবে এবং মিশনে যাবে। নাহলে পরবর্তী খেলোয়াড় নতুন সেনাপতি হয়ে আবার চেষ্টা করবেন। মনে রাখবেন - একই অধ্যায়ে টানা ৫ বার প্রস্তাব ব্যর্থ হলে EIC পক্ষ সাথে সাথেই পুরো খেলা জিতে যাবে, তাই একেবারে অকারণে বারবার প্রত্যাখ্যান করা বিপজ্জনক!</li>
+      <li><strong>মিশন:</strong> দলের সদস্যরা গোপনে সফলতা বা বিশ্বাসঘাতকতার কার্ড খেলবেন। নবাব পক্ষকে সবসময় সফলতার কার্ড খেলতে হয় - তাদের কোনো উপায় নেই। EIC পক্ষ ইচ্ছামতো যেকোনোটি খেলতে পারে।</li>
       <li><strong>ফলাফল:</strong> কার্ডগুলো মিশিয়ে প্রকাশ করা হবে। একটিও বিশ্বাসঘাতকতার কার্ড থাকলেই সেই অধ্যায়ে EIC পক্ষ জয়ী (ব্যতিক্রম উপরের "খেলোয়াড় সংখ্যা" ট্যাবে দেখুন)।</li>
     </ol>
   </div>`;
@@ -609,7 +609,7 @@ function rulebookEndHTML(){
   return `<div class="rulebook-section">
     <h3>খেলার সমাপ্তি</h3>
     <p>কোনো এক পক্ষ ৩টি অধ্যায় জিতলেই খেলা মূলত শেষ। EIC পক্ষ ৩টি জিতলে তারাই সরাসরি জয়ী।</p>
-    <p>কিন্তু নবাব পক্ষ ৩টি জিতলেও, EIC পক্ষ শেষ একটি সুযোগ পাবে — তারা একসাথে আলোচনা করবেন, এরপর মীর জাফরকে অনুমান করতে হবে নবাব পক্ষের মধ্যে আসল মীর মদন কে। সঠিক অনুমান হলে শেষ মুহূর্তে EIC পক্ষই জয়ী হয়ে যাবে; ভুল হলে নবাব পক্ষের জয় চূড়ান্ত থাকবে। ঠিক যেন ইতিহাসের সেই মুহূর্ত — যেখানে বিশ্বাসঘাতকতাই ছিল আসল অস্ত্র।</p>
+    <p>কিন্তু নবাব পক্ষ ৩টি জিতলেও, EIC পক্ষ শেষ একটি সুযোগ পাবে - তারা একসাথে আলোচনা করবেন, এরপর মীর জাফরকে অনুমান করতে হবে নবাব পক্ষের মধ্যে আসল মীর মদন কে। সঠিক অনুমান হলে শেষ মুহূর্তে EIC পক্ষই জয়ী হয়ে যাবে; ভুল হলে নবাব পক্ষের জয় চূড়ান্ত থাকবে। ঠিক যেন ইতিহাসের সেই মুহূর্ত - যেখানে বিশ্বাসঘাতকতাই ছিল আসল অস্ত্র।</p>
   </div>`;
 }
 
@@ -676,15 +676,15 @@ SCREENS.landing = function(){
   const wrap = el('div');
   wrap.appendChild(el('div','title-block',
     `<div class="eyebrow">Bengal, 1757</div><h1>পলাশী</h1>
-     <div class="sub">অনলাইন সংস্করণ — একসাথে অনেক ফোনে খেলুন</div>`));
+     <div class="sub">অনলাইন সংস্করণ - একসাথে অনেক ফোনে খেলুন</div>`));
 
-  const rulebookBtn = el('button','btn btn-ghost','📖 খেলার নিয়ম দেখুন');
+  const rulebookBtn = el('button','btn btn-ghost','খেলার নিয়ম দেখুন');
   rulebookBtn.onclick = ()=>{ client._showRulebook = true; client._rulebookTab = null; render(); };
   wrap.appendChild(rulebookBtn);
 
   const card = el('div','card');
   card.appendChild(el('h2','গেম হোস্ট করুন'));
-  card.appendChild(el('p','আপনি অ্যাডমিন হিসেবে খেলা পরিচালনা করবেন। খেলোয়াড় সংখ্যা বাছাই করুন, তারপর একটি রুম কোড তৈরি হবে — সেটি বাকি খেলোয়াড়দের দিন।'));
+  card.appendChild(el('p','আপনি অ্যাডমিন হিসেবে খেলা পরিচালনা করবেন। খেলোয়াড় সংখ্যা বাছাই করুন, তারপর একটি রুম কোড তৈরি হবে - সেটি বাকি খেলোয়াড়দের দিন।'));
   card.appendChild(el('label','খেলোয়াড় সংখ্যা (৫–১০ জন)'));
   const countGrid = el('div','chip-grid');
   [5,6,7,8,9,10].forEach(n=>{
@@ -763,7 +763,7 @@ SCREENS.landing = function(){
       startPolling();
       return;
     }
-    if(room.players.length >= room.game.numPlayers){ showJoinError(`রুম পূর্ণ (${room.game.numPlayers} জন) — আর কেউ যোগ দিতে পারবে না।`); return; }
+    if(room.players.length >= room.game.numPlayers){ showJoinError(`রুম পূর্ণ (${room.game.numPlayers} জন) - আর কেউ যোগ দিতে পারবে না।`); return; }
     const updated = await mutateRoom(code, (r)=>{
       r.players = addPlayerIdempotent(r.players, name, r.game.numPlayers);
       return r;
@@ -857,7 +857,7 @@ function chapterHeader(game){
   game.chapterResults.forEach(r=>wins[r]++);
   const holder = el('div');
   holder.appendChild(bar);
-  holder.appendChild(el('div','scoreline', `নবাব পক্ষ ${wins.nawab} — ${wins.eic} EIC পক্ষ   ·   টানা ব্যর্থ দল গঠন: ${game.rejectCount}/5`));
+  holder.appendChild(el('div','scoreline', `নবাব পক্ষ ${wins.nawab} - ${wins.eic} EIC পক্ষ   ·   টানা ব্যর্থ দল গঠন: ${game.rejectCount}/5`));
   return holder;
 }
 
@@ -889,13 +889,13 @@ PHASE.lobby = function(room){
   card.appendChild(roster);
 
   if(client.role==='host'){
-    const rulebookBtn = el('button','btn btn-outline','📖 খেলার নিয়ম দেখুন');
+    const rulebookBtn = el('button','btn btn-outline','খেলার নিয়ম দেখুন');
     rulebookBtn.onclick = ()=>{ client._showRulebook = true; client._rulebookTab = null; render(); };
     card.appendChild(rulebookBtn);
     const roleIds = getRoleIdsForCount(numPlayers);
     const nawabNames = roleIds.filter(id=>ROLE_DEFS[id].team==='nawab').map(id=>ROLE_DEFS[id].bn);
     const eicNames = roleIds.filter(id=>ROLE_DEFS[id].team==='eic').map(id=>ROLE_DEFS[id].bn);
-    const note = el('div','note-box', `এই খেলাটি ${numPlayers} জন খেলোয়াড়ের জন্য, বাস্তব রুলবুকে নিশ্চিত করা ভূমিকা বণ্টন অনুযায়ী: <strong>নবাব পক্ষ (${nawabNames.length})</strong> — ${nawabNames.join(', ')}। <strong>EIC পক্ষ (${eicNames.length})</strong> — ${eicNames.join(', ')}।`);
+    const note = el('div','note-box', `এই খেলাটি ${numPlayers} জন খেলোয়াড়ের জন্য, বাস্তব রুলবুকে নিশ্চিত করা ভূমিকা বণ্টন অনুযায়ী: <strong>নবাব পক্ষ (${nawabNames.length})</strong> - ${nawabNames.join(', ')}। <strong>EIC পক্ষ (${eicNames.length})</strong> - ${eicNames.join(', ')}।`);
     card.appendChild(note);
     const btn = el('button','btn btn-gold', `ভূমিকা বণ্টন করে খেলা শুরু করুন (${room.players.length}/${numPlayers})`);
     btn.disabled = room.players.length !== numPlayers;
@@ -986,13 +986,13 @@ PHASE.reveal = function(room){
     if(myRole.team==='eic'){
       const others = game.playersOrder.filter(n=> n!==client.myName && game.roles[n].team==='eic');
       const box = el('div','note-box');
-      box.innerHTML = '<strong>আপনার সহযোগী EIC এজেন্ট:</strong><br>' + others.map(n=>`${n} — <em>${game.roles[n].bn}</em>`).join('<br>');
+      box.innerHTML = '<strong>আপনার সহযোগী EIC এজেন্ট:</strong><br>' + others.map(n=>`${n} - <em>${game.roles[n].bn}</em>`).join('<br>');
       card.appendChild(box);
     } else if(myRole.team==='nawab' && myRole.roleId==='mirmodon'){
       // Ray Durlov's card is hidden from Mir Modon's detection -- exclude him if present.
       const eicMembers = game.playersOrder.filter(n=> game.roles[n].team==='eic' && game.roles[n].roleId!=='raydurlov');
       const box = el('div','note-box');
-      box.innerHTML = '<strong>আপনি জানেন এরা EIC পক্ষে আছে:</strong><br>' + eicMembers.map(n=>`${n} — <em>${game.roles[n].bn}</em>`).join('<br>');
+      box.innerHTML = '<strong>আপনি জানেন এরা EIC পক্ষে আছে:</strong><br>' + eicMembers.map(n=>`${n} - <em>${game.roles[n].bn}</em>`).join('<br>');
       card.appendChild(box);
     } else if(myRole.team==='nawab' && myRole.roleId==='mohonlal'){
       const mirModonName = game.playersOrder.find(n=> game.roles[n].roleId==='mirmodon');
@@ -1002,7 +1002,7 @@ PHASE.reveal = function(room){
       box.innerHTML = '<strong>এদের মধ্যে একজন মীর মদন:</strong><br>' + candidates.join('<br>');
       card.appendChild(box);
     }
-    const btn = el('button','btn btn-outline','মনে রেখেছি — প্রস্তুত');
+    const btn = el('button','btn btn-outline','মনে রেখেছি - প্রস্তুত');
     btn.onclick = ()=> submitAction(btn, async ()=>{
       const result = await mutateRoom(client.roomCode, (r)=>{
         r.game.readyReveal = r.game.readyReveal || {};
@@ -1027,7 +1027,7 @@ PHASE.propose = function(room){
   const teamSize = teamSizesFor(game.numPlayers)[game.chapterIdx];
 
   card.appendChild(el('h2', `অধ্যায় ${game.chapterIdx+1}: দল মনোনয়ন`));
-  card.appendChild(el('p', `সেনাপতি: <strong>${proposer}</strong> — ${teamSize} জনের দল বাছাই করবেন।`));
+  card.appendChild(el('p', `সেনাপতি: <strong>${proposer}</strong> - ${teamSize} জনের দল বাছাই করবেন।`));
 
   const isMyTurn = client.role==='player' && client.myName===proposer;
 
@@ -1191,7 +1191,7 @@ PHASE.mission = function(room){
       }));
     card.appendChild(btn);
   } else {
-    card.appendChild(el('p','EIC এজেন্ট হিসেবে সতর্কভাবে বাছাই করুন — বিশ্বাসঘাতকতা প্রকাশ্য নয়, কিন্তু সন্দেহজনক হতে পারে।'));
+    card.appendChild(el('p','EIC এজেন্ট হিসেবে সতর্কভাবে বাছাই করুন - বিশ্বাসঘাতকতা প্রকাশ্য নয়, কিন্তু সন্দেহজনক হতে পারে।'));
     const row = el('div','btn-row');
     const s1 = el('button','btn btn-nawab','সফল');
     s1.onclick = ()=> submitAction(s1, ()=> mutateRoom(client.roomCode, (r)=>{
@@ -1231,12 +1231,12 @@ PHASE.chapterResult = function(room){
   }
 
   if(wins.eic >= 3){
-    card.appendChild(el('p','EIC পক্ষ ৩টি অধ্যায় জিতে ফেলেছে — খেলা EIC-র জয়ে শেষ।'));
+    card.appendChild(el('p','EIC পক্ষ ৩টি অধ্যায় জিতে ফেলেছে - খেলা EIC-র জয়ে শেষ।'));
     const btn = el('button','btn btn-gold','চূড়ান্ত ফলাফল দেখুন');
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{ r.game.winner='eic'; r.game.phase='gameOver'; return r; }));
     card.appendChild(btn);
   } else if(wins.nawab >= 3){
-    card.appendChild(el('p','নবাব পক্ষ ৩টি অধ্যায় জিতেছে! কিন্তু EIC পক্ষের শেষ সুযোগ বাকি — তারা যদি সঠিকভাবে মীর মদনকে চিহ্নিত করতে পারে, তবে জয় ছিনিয়ে নেবে।'));
+    card.appendChild(el('p','নবাব পক্ষ ৩টি অধ্যায় জিতেছে! কিন্তু EIC পক্ষের শেষ সুযোগ বাকি - তারা যদি সঠিকভাবে মীর মদনকে চিহ্নিত করতে পারে, তবে জয় ছিনিয়ে নেবে।'));
     const btn = el('button','btn btn-gold','EIC-র চূড়ান্ত অনুমান পর্বে যান');
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{ r.game.phase='endgameGuess'; return r; }));
     card.appendChild(btn);
@@ -1332,14 +1332,14 @@ PHASE.gameOver = function(room){
   if(game.eicGuess){
     const guessedRole = game.roles[game.eicGuess];
     const correct = guessedRole && guessedRole.roleId==='mirmodon';
-    card.appendChild(el('p', `EIC-র অনুমান ছিল ${game.eicGuess} — ${correct ? 'সঠিক!' : 'ভুল।'}`));
+    card.appendChild(el('p', `EIC-র অনুমান ছিল ${game.eicGuess} - ${correct ? 'সঠিক!' : 'ভুল।'}`));
   }
   card.appendChild(el('h3','সব ভূমিকা প্রকাশ'));
   const roster = el('div','roster');
   game.playersOrder.forEach(name=>{
     const role = game.roles[name];
     const row = el('div','roster-item');
-    row.innerHTML = `<span>${name} — <em>${role.bn}</em></span><span class="tag ${role.team}">${role.team==='nawab'?'নবাব':'EIC'}</span>`;
+    row.innerHTML = `<span>${name} - <em>${role.bn}</em></span><span class="tag ${role.team}">${role.team==='nawab'?'নবাব':'EIC'}</span>`;
     roster.appendChild(row);
   });
   card.appendChild(roster);
