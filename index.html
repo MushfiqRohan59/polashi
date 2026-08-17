@@ -111,18 +111,41 @@
 // .btn/.chip/.seal silently never fires on iPhone.
 document.addEventListener('touchstart', function(){}, {passive:true});
 
-/* ============ FIXED 5-PLAYER ROLE SET (confirmed against physical rulebook) ============ */
-const NAWAB_ROLES = [
-  {id:'siraj', bn:'নবাব সিরাজউদ্দৌলা'},
-  {id:'lutfunnisa', bn:'লুৎফুন্নেসা বেগম'},
-  {id:'mirmodon', bn:'মীর মদন'},
-];
-const EIC_ROLES = [
-  {id:'mirjafar', bn:'মীর জাফর'},
-  {id:'ghoseti', bn:'ঘসেটি বেগম'},
-];
-const TEAM_SIZES = [2,3,2,3,3]; // chapter 1..5, adapted (unconfirmed) for 5 players
-const NUM_PLAYERS = 5;
+/* ============ VARIABLE 5-10 PLAYER ROLE SET (confirmed against physical rulebook) ============ */
+const ROLE_DEFS = {
+  mirmodon:     {bn:'মীর মদন', team:'nawab'},
+  mirjafar:     {bn:'মীর জাফর', team:'eic'},
+  sirajuddaula: {bn:'নবাব সিরাজউদ্দৌলা', team:'nawab'},
+  lutfunnesa:   {bn:'লুৎফুন্নেসা বেগম', team:'nawab'},
+  ghaseti:      {bn:'ঘসেটি বেগম', team:'eic'},
+  mohonlal:     {bn:'মোহন লাল', team:'nawab'},
+  raydurlov:    {bn:'রায় দুর্লভ', team:'eic'},
+  saintfrais:   {bn:'সেইন্ট ফ্রে', team:'nawab'},
+  nawabextra:   {bn:'নবাব-পক্ষের অতিরিক্ত সৈনিক', team:'nawab'},
+  eicextra:     {bn:'EIC-পক্ষের অতিরিক্ত সৈনিক', team:'eic'},
+};
+// Role pool for a given player count, per the confirmed rulebook table.
+function getRoleIdsForCount(numPlayers){
+  const ids = ['mirmodon','mirjafar','sirajuddaula','lutfunnesa','ghaseti'];
+  if(numPlayers >= 6) ids.push('mohonlal');
+  if(numPlayers >= 7) ids.push('raydurlov');
+  if(numPlayers >= 8) ids.push('saintfrais');
+  if(numPlayers >= 9) ids.push('nawabextra');
+  if(numPlayers >= 10) ids.push('eicextra');
+  return ids;
+}
+const TEAM_SIZES_BY_COUNT = {
+  5:  [2,3,2,3,3],
+  6:  [2,3,4,3,4],
+  7:  [2,3,3,4,4],
+  8:  [3,4,4,5,6],
+  9:  [3,4,4,5,6],
+  10: [3,4,4,5,6],
+};
+const DEFAULT_NUM_PLAYERS = 5;
+function teamSizesFor(numPlayers){
+  return TEAM_SIZES_BY_COUNT[numPlayers] || TEAM_SIZES_BY_COUNT[DEFAULT_NUM_PLAYERS];
+}
 
 function shuffle(arr){
   const a=[...arr];
@@ -176,10 +199,10 @@ function dedupePlayers(players){
 // Adds a player only if no one with that name is already present and there's
 // a free seat -- so calling this twice for the same name (e.g. a refresh /
 // rejoin) is a no-op the second time, instead of appending a duplicate.
-function addPlayerIdempotent(players, name){
+function addPlayerIdempotent(players, name, numPlayers){
   const list = dedupePlayers(players);
   if(list.find(p=>p.name===name)) return list;
-  if(list.length >= NUM_PLAYERS) return list;
+  if(list.length >= numPlayers) return list;
   return [...list, {name}];
 }
 // Drops any dict keys that don't belong to a name in allowedNames.
@@ -198,6 +221,7 @@ function normalizeRoom(room){
   if(!room) return room;
   room.players = dedupePlayers(room.players || []);
   const g = room.game = room.game || {};
+  g.numPlayers = g.numPlayers || DEFAULT_NUM_PLAYERS;
   g.playersOrder = g.playersOrder || [];
   g.roles = g.roles || {};
   g.readyReveal = g.readyReveal || {};
@@ -265,9 +289,10 @@ async function mutateRoom(code, mutator){
   return updated;
 }
 
-function freshGame(){
+function freshGame(numPlayers){
   return {
     phase: 'lobby', // lobby, reveal, propose, vote, mission, chapterResult, endgameGuess, gameOver
+    numPlayers: numPlayers || DEFAULT_NUM_PLAYERS,
     playersOrder: [],
     roles: {},       // name -> {team, roleId, bn}
     readyReveal: {},
@@ -383,17 +408,27 @@ SCREENS.landing = function(){
 
   const card = el('div','card');
   card.appendChild(el('h2','গেম হোস্ট করুন'));
-  card.appendChild(el('p','আপনি অ্যাডমিন হিসেবে খেলা পরিচালনা করবেন। একটি রুম কোড তৈরি হবে, সেটি বাকি ৫ জন খেলোয়াড়কে দিন।'));
+  card.appendChild(el('p','আপনি অ্যাডমিন হিসেবে খেলা পরিচালনা করবেন। খেলোয়াড় সংখ্যা বাছাই করুন, তারপর একটি রুম কোড তৈরি হবে — সেটি বাকি খেলোয়াড়দের দিন।'));
+  card.appendChild(el('label','খেলোয়াড় সংখ্যা (৫–১০ জন)'));
+  const countGrid = el('div','chip-grid');
+  [5,6,7,8,9,10].forEach(n=>{
+    const chip = el('div','chip'+(client._numPlayers===n?' selected':''), String(n));
+    chip.onclick = ()=>{ client._numPlayers = n; render(); };
+    countGrid.appendChild(chip);
+  });
+  card.appendChild(countGrid);
   const hostBtn = el('button','btn btn-gold','রুম তৈরি করুন');
+  hostBtn.disabled = !client._numPlayers;
   const hostStatus = el('div','note-box');
   hostStatus.style.display='none';
   hostBtn.onclick = async ()=>{
+    if(!client._numPlayers) return;
     hostBtn.disabled = true;
     hostBtn.classList.add('is-loading');
     hostBtn.innerHTML = '<span class="btn-spin"></span>তৈরি করা হচ্ছে...';
     hostStatus.style.display='none';
     const code = randomCode();
-    const ok = await saveRoom(code, {players:[], game: freshGame()});
+    const ok = await saveRoom(code, {players:[], game: freshGame(client._numPlayers)});
     if(!ok){
       hostBtn.disabled = false;
       hostBtn.classList.remove('is-loading');
@@ -450,9 +485,9 @@ SCREENS.landing = function(){
       startPolling();
       return;
     }
-    if(room.players.length >= NUM_PLAYERS){ showJoinError('রুম পূর্ণ হয়ে গেছে (৫ জন)।'); return; }
+    if(room.players.length >= room.game.numPlayers){ showJoinError(`রুম পূর্ণ (${room.game.numPlayers} জন) — আর কেউ যোগ দিতে পারবে না।`); return; }
     const updated = await mutateRoom(code, (r)=>{
-      r.players = addPlayerIdempotent(r.players, name);
+      r.players = addPlayerIdempotent(r.players, name, r.game.numPlayers);
       return r;
     });
     if(!updated){
@@ -503,13 +538,14 @@ SCREENS.gameScreen = function(){
 };
 
 function chapterHeader(game){
+  const sizes = teamSizesFor(game.numPlayers);
   const bar = el('div','progress-bar');
   for(let i=0;i<5;i++){
     let cls='map-card';
     if(game.chapterResults[i]==='nawab') cls+=' won-nawab';
     if(game.chapterResults[i]==='eic') cls+=' won-eic';
     if(i===game.chapterIdx && game.phase!=='gameOver') cls+=' current';
-    bar.appendChild(el('div',cls, `${i+1}<br>${TEAM_SIZES[i]}জন`));
+    bar.appendChild(el('div',cls, `${i+1}<br>${sizes[i]}জন`));
   }
   const wins={nawab:0,eic:0};
   game.chapterResults.forEach(r=>wins[r]++);
@@ -538,7 +574,8 @@ PHASE.lobby = function(room){
     row.innerHTML = `<span>${p.name}</span><span class="pill ready">যোগ দিয়েছেন</span>`;
     roster.appendChild(row);
   });
-  for(let i=room.players.length;i<NUM_PLAYERS;i++){
+  const numPlayers = room.game.numPlayers;
+  for(let i=room.players.length;i<numPlayers;i++){
     const row = el('div','roster-item');
     row.innerHTML = `<span style="opacity:0.5">অপেক্ষমান আসন</span><span class="pill wait">খালি</span>`;
     roster.appendChild(row);
@@ -546,20 +583,21 @@ PHASE.lobby = function(room){
   card.appendChild(roster);
 
   if(client.role==='host'){
-    const note = el('div','note-box', 'এই সংস্করণ ৫ জন খেলোয়াড়ের জন্য নির্দিষ্ট, বাস্তব রুলবুকে নিশ্চিত করা ভূমিকা বণ্টন অনুযায়ী: <strong>নবাব পক্ষ (৩)</strong> — নবাব সিরাজউদ্দৌলা, লুৎফুন্নেসা বেগম, মীর মদন। <strong>EIC পক্ষ (২)</strong> — মীর জাফর, ঘসেটি বেগম।');
+    const roleIds = getRoleIdsForCount(numPlayers);
+    const nawabNames = roleIds.filter(id=>ROLE_DEFS[id].team==='nawab').map(id=>ROLE_DEFS[id].bn);
+    const eicNames = roleIds.filter(id=>ROLE_DEFS[id].team==='eic').map(id=>ROLE_DEFS[id].bn);
+    const note = el('div','note-box', `এই খেলাটি ${numPlayers} জন খেলোয়াড়ের জন্য, বাস্তব রুলবুকে নিশ্চিত করা ভূমিকা বণ্টন অনুযায়ী: <strong>নবাব পক্ষ (${nawabNames.length})</strong> — ${nawabNames.join(', ')}। <strong>EIC পক্ষ (${eicNames.length})</strong> — ${eicNames.join(', ')}।`);
     card.appendChild(note);
-    const btn = el('button','btn btn-gold', `ভূমিকা বণ্টন করে খেলা শুরু করুন (${room.players.length}/${NUM_PLAYERS})`);
-    btn.disabled = room.players.length !== NUM_PLAYERS;
+    const btn = el('button','btn btn-gold', `ভূমিকা বণ্টন করে খেলা শুরু করুন (${room.players.length}/${numPlayers})`);
+    btn.disabled = room.players.length !== numPlayers;
     btn.onclick = ()=> submitAction(btn, ()=>{
-      const roleList = shuffle([
-        ...NAWAB_ROLES.map(r=>({team:'nawab', roleId:r.id, bn:r.bn})),
-        ...EIC_ROLES.map(r=>({team:'eic', roleId:r.id, bn:r.bn})),
-      ]);
       return mutateRoom(client.roomCode, (r)=>{
+        const n = r.game.numPlayers || DEFAULT_NUM_PLAYERS;
+        const roleList = shuffle(getRoleIdsForCount(n).map(id=>({team:ROLE_DEFS[id].team, roleId:id, bn:ROLE_DEFS[id].bn})));
         const order = shuffle(r.players.map(p=>p.name));
         const roles = {};
         order.forEach((name,i)=>{ roles[name] = roleList[i]; });
-        r.game = freshGame();
+        r.game = freshGame(n);
         r.game.playersOrder = order;
         r.game.roles = roles;
         r.game.phase = 'reveal';
@@ -579,7 +617,7 @@ PHASE.reveal = function(room){
   const card = el('div','card');
 
   if(client.role==='host'){
-    const readyCount = Math.min(Object.keys(game.readyReveal||{}).length, room.players.length, NUM_PLAYERS);
+    const readyCount = Math.min(Object.keys(game.readyReveal||{}).length, room.players.length, game.numPlayers);
     card.appendChild(el('h2','ভূমিকা দেখা হচ্ছে'));
     card.appendChild(el('p','প্রত্যেক খেলোয়াড় তার নিজের ফোনে গোপনে ভূমিকা দেখছেন।'));
     const roster = el('div','roster');
@@ -590,8 +628,8 @@ PHASE.reveal = function(room){
       roster.appendChild(row);
     });
     card.appendChild(roster);
-    const btn = el('button','btn btn-gold', `অধ্যায় ১ শুরু করুন (${readyCount}/${NUM_PLAYERS})`);
-    btn.disabled = readyCount !== NUM_PLAYERS;
+    const btn = el('button','btn btn-gold', `অধ্যায় ১ শুরু করুন (${readyCount}/${game.numPlayers})`);
+    btn.disabled = readyCount !== game.numPlayers;
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
       r.game.phase='propose';
       return r;
@@ -642,9 +680,17 @@ PHASE.reveal = function(room){
       box.innerHTML = '<strong>আপনার সহযোগী EIC এজেন্ট:</strong><br>' + others.map(n=>`${n} — <em>${game.roles[n].bn}</em>`).join('<br>');
       card.appendChild(box);
     } else if(myRole.team==='nawab' && myRole.roleId==='mirmodon'){
-      const eicMembers = game.playersOrder.filter(n=> game.roles[n].team==='eic');
+      // Ray Durlov's card is hidden from Mir Modon's detection -- exclude him if present.
+      const eicMembers = game.playersOrder.filter(n=> game.roles[n].team==='eic' && game.roles[n].roleId!=='raydurlov');
       const box = el('div','note-box');
       box.innerHTML = '<strong>আপনি জানেন এরা EIC পক্ষে আছে:</strong><br>' + eicMembers.map(n=>`${n} — <em>${game.roles[n].bn}</em>`).join('<br>');
+      card.appendChild(box);
+    } else if(myRole.team==='nawab' && myRole.roleId==='mohonlal'){
+      const mirModonName = game.playersOrder.find(n=> game.roles[n].roleId==='mirmodon');
+      const ghasetiName = game.playersOrder.find(n=> game.roles[n].roleId==='ghaseti');
+      const candidates = shuffle([mirModonName, ghasetiName].filter(Boolean));
+      const box = el('div','note-box');
+      box.innerHTML = '<strong>এদের মধ্যে একজন মীর মদন:</strong><br>' + candidates.join('<br>');
       card.appendChild(box);
     }
     const btn = el('button','btn btn-outline','মনে রেখেছি — প্রস্তুত');
@@ -669,7 +715,7 @@ PHASE.propose = function(room){
   const wrap = el('div');
   const card = el('div','card');
   const proposer = game.playersOrder[game.proposerIdx];
-  const teamSize = TEAM_SIZES[game.chapterIdx];
+  const teamSize = teamSizesFor(game.numPlayers)[game.chapterIdx];
 
   card.appendChild(el('h2', `অধ্যায় ${game.chapterIdx+1}: দল মনোনয়ন`));
   card.appendChild(el('p', `সেনাপতি: <strong>${proposer}</strong> — ${teamSize} জনের দল বাছাই করবেন।`));
@@ -721,12 +767,12 @@ PHASE.vote = function(room){
   card.appendChild(el('h2', `অধ্যায় ${game.chapterIdx+1}: পরিষদের ভোট`));
   card.appendChild(el('p', `প্রস্তাবিত দলঃ ${teamNames}`));
 
-  const voteCount = Math.min(Object.keys(game.votes||{}).length, room.players.length, NUM_PLAYERS);
+  const voteCount = Math.min(Object.keys(game.votes||{}).length, room.players.length, game.numPlayers);
 
   if(client.role==='host'){
-    card.appendChild(el('p', `ভোট জমা পড়েছে: ${voteCount}/${NUM_PLAYERS}`));
+    card.appendChild(el('p', `ভোট জমা পড়েছে: ${voteCount}/${game.numPlayers}`));
     const btn = el('button','btn btn-gold','ভোটের ফলাফল প্রকাশ করুন');
-    btn.disabled = voteCount !== NUM_PLAYERS;
+    btn.disabled = voteCount !== game.numPlayers;
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
         const approvals = Object.values(r.game.votes).filter(v=>v==='approve').length;
         const rejections = Object.values(r.game.votes).filter(v=>v==='reject').length;
@@ -743,7 +789,7 @@ PHASE.vote = function(room){
             r.game.winner = 'eic';
             r.game.phase = 'gameOver';
           } else {
-            r.game.proposerIdx = (r.game.proposerIdx+1) % NUM_PLAYERS;
+            r.game.proposerIdx = (r.game.proposerIdx+1) % r.game.numPlayers;
             r.game.selectedTeam = [];
             r.game.phase = 'propose';
           }
@@ -758,7 +804,7 @@ PHASE.vote = function(room){
   // player
   const myVote = game.votes && game.votes[client.myName];
   if(myVote){
-    card.appendChild(el('div','waiting-box', `<div class="spinner"></div><p>আপনার ভোট (${myVote==='approve'?'অনুমোদন':'প্রত্যাখ্যান'}) জমা হয়েছে। বাকিদের জন্য অপেক্ষা করুন। (${voteCount}/${NUM_PLAYERS})</p>`));
+    card.appendChild(el('div','waiting-box', `<div class="spinner"></div><p>আপনার ভোট (${myVote==='approve'?'অনুমোদন':'প্রত্যাখ্যান'}) জমা হয়েছে। বাকিদের জন্য অপেক্ষা করুন। (${voteCount}/${game.numPlayers})</p>`));
   } else {
     const row = el('div','btn-row');
     const approveBtn = el('button','btn btn-nawab','অনুমোদন');
@@ -797,7 +843,8 @@ PHASE.mission = function(room){
     btn.disabled = playedCount !== needed;
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
         const betrayals = Object.values(r.game.missionCards).filter(v=>v==='betray').length;
-        const outcome = betrayals >= 1 ? 'eic' : 'nawab';
+        const needsTwo = r.game.numPlayers >= 7 && r.game.chapterIdx === 3;
+        const outcome = betrayals >= (needsTwo ? 2 : 1) ? 'eic' : 'nawab';
         r.game.chapterResults[r.game.chapterIdx] = outcome;
         r.game._lastBetrayals = betrayals;
         r.game.phase = 'chapterResult';
@@ -894,7 +941,7 @@ PHASE.chapterResult = function(room){
     const btn = el('button','btn btn-gold', `অধ্যায় ${game.chapterIdx+2}-এ যান`);
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
         r.game.chapterIdx += 1;
-        r.game.proposerIdx = (r.game.proposerIdx+1) % NUM_PLAYERS;
+        r.game.proposerIdx = (r.game.proposerIdx+1) % r.game.numPlayers;
         r.game.selectedTeam = [];
         r.game.rejectCount = 0;
         r.game.votes = {};
@@ -991,7 +1038,7 @@ PHASE.gameOver = function(room){
   if(client.role==='host'){
     const btn = el('button','btn btn-gold','নতুন খেলা শুরু করুন (একই কোড)');
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
-        r.game = freshGame();
+        r.game = freshGame(r.game.numPlayers);
         return r;
       }));
     card.appendChild(btn);
