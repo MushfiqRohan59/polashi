@@ -153,13 +153,40 @@ async function withRetry(fn, attempts=4, baseDelay=350){
 // only inside Claude.ai. Rooms are stored at {FIREBASE_DB_URL}/rooms/{code}.json
 const FIREBASE_DB_URL = 'https://polashi-game-default-rtdb.asia-southeast1.firebasedatabase.app';
 
+// Collapses any accidental duplicate player entries (same name) down to one,
+// keeping the first. Belt-and-suspenders alongside addPlayerIdempotent below.
+function dedupePlayers(players){
+  const seen = new Set();
+  return (players||[]).filter(p=>{
+    if(seen.has(p.name)) return false;
+    seen.add(p.name);
+    return true;
+  });
+}
+// Adds a player only if no one with that name is already present and there's
+// a free seat -- so calling this twice for the same name (e.g. a refresh /
+// rejoin) is a no-op the second time, instead of appending a duplicate.
+function addPlayerIdempotent(players, name){
+  const list = dedupePlayers(players);
+  if(list.find(p=>p.name===name)) return list;
+  if(list.length >= NUM_PLAYERS) return list;
+  return [...list, {name}];
+}
+// Drops any dict keys that don't belong to a name in allowedNames.
+function pruneKeys(dict, allowedNames){
+  const allowed = new Set(allowedNames);
+  const out = {};
+  for(const k in (dict||{})){ if(allowed.has(k)) out[k] = dict[k]; }
+  return out;
+}
+
 // Firebase silently drops empty arrays/objects on write instead of storing them,
 // so a field that was [] or {} at save time comes back as `undefined` on read.
 // Patch the shape back in right here so every caller can keep assuming
 // room.players is an array and room.game.* has its normal type.
 function normalizeRoom(room){
   if(!room) return room;
-  room.players = room.players || [];
+  room.players = dedupePlayers(room.players || []);
   const g = room.game = room.game || {};
   g.playersOrder = g.playersOrder || [];
   g.roles = g.roles || {};
@@ -168,6 +195,14 @@ function normalizeRoom(room){
   g.votes = g.votes || {};
   g.missionCards = g.missionCards || {};
   g.chapterResults = g.chapterResults || [];
+  // Safety net: ready/vote/mission entries should only ever reference players
+  // still in the room. Prune anything stale left behind by a missed reset or
+  // a rejoin-under-a-different-name edge case, so these counts can never
+  // exceed room.players.length no matter how they got out of sync.
+  const knownNames = room.players.map(p=>p.name);
+  g.readyReveal = pruneKeys(g.readyReveal, knownNames);
+  g.votes = pruneKeys(g.votes, knownNames);
+  g.missionCards = pruneKeys(g.missionCards, knownNames);
   return room;
 }
 
@@ -358,9 +393,7 @@ SCREENS.landing = function(){
     }
     if(room.players.length >= NUM_PLAYERS){ showJoinError('রুম পূর্ণ হয়ে গেছে (৫ জন)।'); return; }
     const updated = await mutateRoom(code, (r)=>{
-      if(r.players.length < NUM_PLAYERS && !r.players.find(p=>p.name===name)){
-        r.players.push({name});
-      }
+      r.players = addPlayerIdempotent(r.players, name);
       return r;
     });
     if(!updated){
@@ -487,7 +520,7 @@ PHASE.reveal = function(room){
   const card = el('div','card');
 
   if(client.role==='host'){
-    const readyCount = Object.keys(game.readyReveal||{}).length;
+    const readyCount = Math.min(Object.keys(game.readyReveal||{}).length, room.players.length, NUM_PLAYERS);
     card.appendChild(el('h2','ভূমিকা দেখা হচ্ছে'));
     card.appendChild(el('p','প্রত্যেক খেলোয়াড় তার নিজের ফোনে গোপনে ভূমিকা দেখছেন।'));
     const roster = el('div','roster');
@@ -618,7 +651,7 @@ PHASE.vote = function(room){
   card.appendChild(el('h2', `অধ্যায় ${game.chapterIdx+1}: পরিষদের ভোট`));
   card.appendChild(el('p', `প্রস্তাবিত দলঃ ${teamNames}`));
 
-  const voteCount = Object.keys(game.votes||{}).length;
+  const voteCount = Math.min(Object.keys(game.votes||{}).length, room.players.length, NUM_PLAYERS);
 
   if(client.role==='host'){
     card.appendChild(el('p', `ভোট জমা পড়েছে: ${voteCount}/${NUM_PLAYERS}`));
@@ -690,8 +723,8 @@ PHASE.mission = function(room){
   card.appendChild(el('h2', `অধ্যায় ${game.chapterIdx+1} সংঘটিত হচ্ছে`));
   card.appendChild(el('p', `দলঃ ${game.selectedTeam.join(', ')}`));
 
-  const playedCount = Object.keys(game.missionCards||{}).length;
   const needed = game.selectedTeam.length;
+  const playedCount = Math.min(Object.keys(game.missionCards||{}).length, needed);
 
   if(client.role==='host'){
     card.appendChild(el('p', `কার্ড জমা পড়েছে: ${playedCount}/${needed}`));
