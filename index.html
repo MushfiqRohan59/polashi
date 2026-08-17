@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>পলাশী — অনলাইন সংস্করণ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#10182B;
+    --navy-deep:#0A0F1E;
+    --parchment:#EDE1C8;
+    --parchment-dim:#E1D3B0;
+    --ink:#2A2117;
+    --gold:#C9A227;
+    --gold-bright:#E4C158;
+    --nawab:#2F5233;
+    --nawab-bright:#4A7A50;
+    --eic:#7A2E2E;
+    --eic-bright:#A83E3E;
+    --line:rgba(201,162,39,0.25);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse at top, #16213E 0%, var(--navy) 45%, var(--navy-deep) 100%);
+    min-height:100vh;
+    font-family:'Noto Sans Bengali','Cinzel',serif;
+    color:var(--parchment);
+    display:flex; justify-content:center;
+  }
+  #app{ width:100%; max-width:540px; min-height:100vh; position:relative; display:flex; flex-direction:column; padding:20px 16px 40px;}
+  .bg-lines{ position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:38px 38px; opacity:0.35;
+    mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
+  }
+  h1,h2,h3{ font-family:'Tiro Bangla', serif; letter-spacing:0.01em; margin:0 0 6px; font-weight:700;}
+  .eyebrow{ font-family:'Cinzel', serif; font-size:10.5px; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;}
+  .title-block{ text-align:center; margin:8px 0 24px; position:relative; z-index:1;}
+  .title-block h1{ font-size:32px; color:var(--parchment);}
+  .title-block .sub{ font-size:16px; color:var(--gold-bright); font-family:'Noto Sans Bengali',serif;}
+  .card{ background:var(--parchment); color:var(--ink); border-radius:4px; padding:20px 18px; box-shadow:0 12px 30px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(42,33,23,0.08); position:relative; z-index:1; margin-bottom:14px;}
+  .card::before{ content:""; position:absolute; inset:6px; border:1px solid rgba(42,33,23,0.15); pointer-events:none;}
+  .card h2{ color:var(--ink); font-size:21px;}
+  .card p{ line-height:1.6; font-size:16px; margin:8px 0;}
+  label{ display:block; font-size:13px; letter-spacing:0.04em; color:#5a4d38; margin:14px 0 6px; font-family:'Noto Sans Bengali',serif; font-weight:600;}
+  input[type=text]{ width:100%; padding:11px 12px; border-radius:3px; border:1px solid rgba(42,33,23,0.3); background:#F7F0DE; font-family:'Noto Sans Bengali',serif; font-size:17px; color:var(--ink);}
+  input:focus{ outline:2px solid var(--gold);}
+  .btn{ font-family:'Noto Sans Bengali',serif; font-weight:700; letter-spacing:0.01em; font-size:15px; padding:13px 18px; border-radius:3px; border:none; cursor:pointer; width:100%; margin-top:12px;}
+  .btn:active{ transform:scale(0.98);}
+  .btn-gold{ background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:var(--navy-deep); box-shadow:0 4px 12px rgba(201,162,39,0.35);}
+  .btn-nawab{ background:linear-gradient(180deg, var(--nawab-bright), var(--nawab)); color:#EDF3EA;}
+  .btn-eic{ background:linear-gradient(180deg, var(--eic-bright), var(--eic)); color:#F5E7E7;}
+  .btn-outline{ background:transparent; border:1px solid rgba(42,33,23,0.35); color:var(--ink);}
+  .btn:disabled{ opacity:0.4; cursor:not-allowed;}
+  .btn-row{ display:flex; gap:10px;}
+  .btn-row .btn{ margin-top:0;}
+  .code-display{ text-align:center; font-family:'Cinzel',serif; font-size:38px; letter-spacing:0.25em; color:var(--gold); background:rgba(201,162,39,0.08); border:1px dashed var(--gold); border-radius:6px; padding:16px; margin:12px 0;}
+  .note-box{ background:rgba(201,162,39,0.08); border:1px solid var(--line); border-radius:4px; padding:12px 14px; font-size:13.5px; color:var(--parchment-dim); margin:12px 0; line-height:1.55;}
+  .roster{ margin-top:6px;}
+  .roster-item{ display:flex; justify-content:space-between; align-items:center; padding:9px 4px; border-bottom:1px solid rgba(42,33,23,0.12); font-size:16px;}
+  .pill{ font-size:11px; padding:3px 9px; border-radius:10px; font-family:'Noto Sans Bengali',serif; font-weight:700;}
+  .pill.wait{ background:#e6dcc0; color:#7a6a45;}
+  .pill.ready{ background:var(--nawab); color:#EDF3EA;}
+  .progress-bar{ display:flex; justify-content:center; gap:8px; margin-bottom:14px; position:relative; z-index:1;}
+  .map-card{ width:38px; height:48px; border-radius:2px; border:1.5px solid var(--gold); display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:11px; color:var(--gold); background:rgba(255,255,255,0.03); text-align:center; line-height:1.2;}
+  .map-card.won-nawab{ background:var(--nawab); border-color:var(--nawab-bright); color:#EDF3EA;}
+  .map-card.won-eic{ background:var(--eic); border-color:var(--eic-bright); color:#F5E7E7;}
+  .map-card.current{ box-shadow:0 0 0 3px rgba(201,162,39,0.4);}
+  .scoreline{ text-align:center; font-size:13.5px; color:var(--gold-bright); margin-bottom:14px; font-family:'Noto Sans Bengali',serif;}
+  .seal-wrap{ display:flex; justify-content:center; margin:22px 0 8px;}
+  .seal{ width:150px; height:150px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; background:radial-gradient(circle at 35% 30%, #d8c894, var(--gold) 55%, #8a6d15 100%); box-shadow:0 10px 26px rgba(0,0,0,0.5), inset 0 0 0 6px rgba(0,0,0,0.15); position:relative; transition:transform 0.35s cubic-bezier(.2,.9,.3,1.3);}
+  .seal.flipped{ transform:rotateY(180deg);}
+  .seal-face{ position:absolute; inset:0; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column; backface-visibility:hidden; font-family:'Tiro Bangla',serif; text-align:center; padding:10px;}
+  .seal-front{ color:var(--navy-deep); font-size:14px;}
+  .seal-back{ transform:rotateY(180deg); color:#fff;}
+  .seal-back.nawab-seal{ background:radial-gradient(circle at 35% 30%, var(--nawab-bright), var(--nawab) 60%, #1c331f 100%);}
+  .seal-back.eic-seal{ background:radial-gradient(circle at 35% 30%, var(--eic-bright), var(--eic) 60%, #401717 100%);}
+  .seal-back .char-name{ font-size:18px; margin-bottom:6px;}
+  .seal-back .team-name{ font-size:12px; letter-spacing:0.05em;}
+  .chip-grid{ display:flex; flex-wrap:wrap; gap:8px; margin:12px 0;}
+  .chip{ padding:9px 14px; border-radius:20px; border:1.5px solid rgba(42,33,23,0.3); background:#F7F0DE; font-family:'Noto Sans Bengali',serif; font-size:15px; cursor:pointer; color:var(--ink);}
+  .chip.selected{ background:var(--gold); border-color:var(--gold); color:var(--navy-deep); font-weight:700;}
+  .result-banner{ text-align:center; padding:16px; border-radius:4px; margin:12px 0; font-family:'Tiro Bangla',serif; font-size:18px;}
+  .result-banner.nawab{ background:rgba(47,82,51,0.18); border:1px solid var(--nawab-bright); color:#bfe0c4;}
+  .result-banner.eic{ background:rgba(122,46,46,0.18); border:1px solid var(--eic-bright); color:#f0bcbc;}
+  .waiting-box{ text-align:center; padding:22px 10px;}
+  .waiting-box .spinner{ width:34px; height:34px; margin:0 auto 14px; border:3px solid rgba(42,33,23,0.15); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite;}
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+  .tag{ font-family:'Noto Sans Bengali',serif; font-size:11px; font-weight:700; padding:3px 8px; border-radius:10px;}
+  .tag.nawab{ background:var(--nawab); color:#EDF3EA;}
+  .tag.eic{ background:var(--eic); color:#F5E7E7;}
+  .footer-note{ text-align:center; font-size:12px; color:rgba(237,225,200,0.5); margin-top:18px; line-height:1.5; position:relative; z-index:1;}
+  .host-badge{ display:inline-block; background:var(--gold); color:var(--navy-deep); font-family:'Cinzel',serif; font-size:10px; letter-spacing:0.1em; padding:3px 8px; border-radius:3px; margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div class="bg-lines"></div>
+<div id="app"></div>
+
+<script>
+/* ============ FIXED 5-PLAYER ROLE SET (confirmed against physical rulebook) ============ */
+const NAWAB_ROLES = [
+  {id:'siraj', bn:'নবাব সিরাজউদ্দৌলা'},
+  {id:'lutfunnisa', bn:'লুৎফুন্নেসা বেগম'},
+  {id:'mirmodon', bn:'মীর মদন'},
+];
+const EIC_ROLES = [
+  {id:'mirjafar', bn:'মীর জাফর'},
+  {id:'ghoseti', bn:'ঘসেটি বেগম'},
+];
+const TEAM_SIZES = [2,3,2,3,3]; // chapter 1..5, adapted (unconfirmed) for 5 players
+const NUM_PLAYERS = 5;
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function randomCode(){
+  return String(Math.floor(1000 + Math.random()*9000));
+}
+function el(tag, cls, html){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+
+/* ============ STORAGE HELPERS (shared across all devices via same room code) ============ */
+const sleep = (ms) => new Promise(r=>setTimeout(r, ms));
+let lastStorageError = null;
+
+// Retries transient storage failures (e.g. "Unexpected response type") with
+// short backoff before giving up. Most real hiccups clear within 1-2 retries.
+async function withRetry(fn, attempts=4, baseDelay=350){
+  let lastErr;
+  for(let i=0;i<attempts;i++){
+    try{
+      return await fn();
+    }catch(e){
+      lastErr = e;
+      if(i < attempts-1) await sleep(baseDelay * Math.pow(1.6, i));
+    }
+  }
+  throw lastErr;
+}
+
+// Firebase Realtime Database REST API — replaces Claude artifact's window.storage
+// so this game can run as a normal hosted webpage (e.g. GitHub Pages) instead of
+// only inside Claude.ai. Rooms are stored at {FIREBASE_DB_URL}/rooms/{code}.json
+const FIREBASE_DB_URL = 'https://polashi-game-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+async function loadRoom(code){
+  try{
+    const res = await withRetry(async ()=>{
+      const resp = await fetch(`${FIREBASE_DB_URL}/rooms/${code}.json`);
+      if(!resp.ok) throw new Error('Firebase GET failed: HTTP ' + resp.status);
+      return resp.json(); // null if the path doesn't exist yet -- not an error
+    });
+    lastStorageError = null;
+    return res || null;
+  }catch(e){
+    lastStorageError = (e && e.message) ? e.message : String(e);
+    console.error('load failed', e);
+    return null;
+  }
+}
+async function saveRoom(code, obj){
+  try{
+    await withRetry(async ()=>{
+      const resp = await fetch(`${FIREBASE_DB_URL}/rooms/${code}.json`, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(obj),
+      });
+      if(!resp.ok) throw new Error('Firebase PUT failed: HTTP ' + resp.status);
+    });
+    lastStorageError = null;
+    return true;
+  }catch(e){
+    lastStorageError = (e && e.message) ? e.message : String(e);
+    console.error('save failed', e);
+    return false;
+  }
+}
+// read-modify-write helper to reduce (not eliminate) race conditions between simultaneous player actions
+async function mutateRoom(code, mutator){
+  const fresh = await loadRoom(code);
+  if(!fresh) return null;
+  const updated = mutator(fresh) || fresh;
+  const ok = await saveRoom(code, updated);
+  if(!ok) return null;
+  return updated;
+}
+
+function freshGame(){
+  return {
+    phase: 'lobby', // lobby, reveal, propose, vote, mission, chapterResult, endgameGuess, gameOver
+    playersOrder: [],
+    roles: {},       // name -> {team, roleId, bn}
+    readyReveal: {},
+    chapterIdx: 0,
+    proposerIdx: 0,
+    selectedTeam: [],
+    votes: {},
+    rejectCount: 0,
+    missionCards: {},
+    chapterResults: [],
+    eicGuess: null,
+    winner: null,
+  };
+}
+
+/* ============ APP / CLIENT STATE (local only, not shared) ============ */
+const client = {
+  role: null,       // null | 'host' | 'player'
+  roomCode: null,
+  myName: null,
+  room: null,        // {players:[], game:{...}} cached from last poll
+  pollTimer: null,
+};
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  app.appendChild(SCREENS.landing_or_active());
+}
+
+function startPolling(){
+  if(client.pollTimer) clearInterval(client.pollTimer);
+  const tick = async ()=>{
+    const room = await loadRoom(client.roomCode);
+    // Don't blank out a screen we already had just because one poll hiccuped —
+    // keep showing the last known state and surface a small connection notice instead.
+    if(room !== null || !client.room){
+      client.room = room;
+    }
+    render();
+  };
+  tick();
+  client.pollTimer = setInterval(tick, 2200);
+}
+
+function connectionBanner(){
+  if(!lastStorageError) return null;
+  const box = el('div','note-box','⚠️ সংযোগে সাময়িক সমস্যা হচ্ছে ('+lastStorageError+') — স্বয়ংক্রিয়ভাবে আবার চেষ্টা করা হচ্ছে।');
+  box.style.borderColor = 'var(--eic-bright)';
+  return box;
+}
+
+/* ============ LANDING ============ */
+const SCREENS = {};
+
+SCREENS.landing_or_active = function(){
+  if(client.role === 'host' || client.role === 'player'){
+    return SCREENS.gameScreen();
+  }
+  return SCREENS.landing();
+};
+
+SCREENS.landing = function(){
+  const wrap = el('div');
+  wrap.appendChild(el('div','title-block',
+    `<div class="eyebrow">Bengal, 1757</div><h1>পলাশী</h1>
+     <div class="sub">অনলাইন সংস্করণ — একসাথে অনেক ফোনে খেলুন</div>`));
+
+  const card = el('div','card');
+  card.appendChild(el('h2','গেম হোস্ট করুন'));
+  card.appendChild(el('p','আপনি অ্যাডমিন হিসেবে খেলা পরিচালনা করবেন। একটি রুম কোড তৈরি হবে, সেটি বাকি ৫ জন খেলোয়াড়কে দিন।'));
+  const hostBtn = el('button','btn btn-gold','রুম তৈরি করুন');
+  const hostStatus = el('div','note-box');
+  hostStatus.style.display='none';
+  hostBtn.onclick = async ()=>{
+    hostBtn.disabled = true;
+    hostBtn.textContent = 'তৈরি করা হচ্ছে...';
+    hostStatus.style.display='none';
+    const code = randomCode();
+    const ok = await saveRoom(code, {players:[], game: freshGame()});
+    if(!ok){
+      hostBtn.disabled = false;
+      hostBtn.textContent = 'রুম তৈরি করুন';
+      hostStatus.style.display='block';
+      hostStatus.innerHTML = `<strong>রুম তৈরি করা যায়নি।</strong> সংযোগ সমস্যা হতে পারে (${lastStorageError || 'অজানা কারণ'})। আবার চেষ্টা করুন।`;
+      return;
+    }
+    client.role = 'host';
+    client.roomCode = code;
+    startPolling();
+  };
+  card.appendChild(hostBtn);
+  card.appendChild(hostStatus);
+  wrap.appendChild(card);
+
+  const card2 = el('div','card');
+  card2.appendChild(el('h2','গেমে যোগ দিন'));
+  card2.appendChild(el('p','আপনার নাম ও অ্যাডমিনের দেওয়া ৪-সংখ্যার কোড লিখুন।'));
+  const nameInput = document.createElement('input');
+  nameInput.type='text'; nameInput.placeholder='আপনার নাম';
+  card2.appendChild(el('label','আপনার নাম'));
+  card2.appendChild(nameInput);
+  const codeInput = document.createElement('input');
+  codeInput.type='text'; codeInput.placeholder='যেমনঃ 4821'; codeInput.maxLength=4;
+  card2.appendChild(el('label','রুম কোড'));
+  card2.appendChild(codeInput);
+  const joinBtn = el('button','btn btn-nawab','যোগ দিন');
+  const joinStatus = el('div','note-box');
+  joinStatus.style.display='none';
+  const showJoinError = (msg)=>{
+    joinBtn.disabled = false;
+    joinBtn.textContent = 'যোগ দিন';
+    joinStatus.style.display='block';
+    joinStatus.innerHTML = msg;
+  };
+  joinBtn.onclick = async ()=>{
+    const name = nameInput.value.trim();
+    const code = codeInput.value.trim();
+    joinStatus.style.display='none';
+    if(!name || !code){ showJoinError('নাম ও কোড দুটোই দিন।'); return; }
+    joinBtn.disabled = true;
+    joinBtn.textContent = 'যোগ দেওয়া হচ্ছে...';
+    const room = await loadRoom(code);
+    if(!room){
+      showJoinError(`<strong>এই কোডে কোনো রুম পাওয়া যায়নি।</strong> কোড ঠিক আছে কিনা দেখুন, অথবা সংযোগ সমস্যা হতে পারে (${lastStorageError || 'কোড ভুল হতে পারে'})।`);
+      return;
+    }
+    if(room.players.find(p=>p.name===name)){
+      // already joined (e.g. reconnect) -- just resume
+      client.role='player'; client.roomCode=code; client.myName=name;
+      startPolling();
+      return;
+    }
+    if(room.players.length >= NUM_PLAYERS){ showJoinError('রুম পূর্ণ হয়ে গেছে (৫ জন)।'); return; }
+    const updated = await mutateRoom(code, (r)=>{
+      if(r.players.length < NUM_PLAYERS && !r.players.find(p=>p.name===name)){
+        r.players.push({name});
+      }
+      return r;
+    });
+    if(!updated){
+      showJoinError(`<strong>যোগ দেওয়া যায়নি।</strong> সংযোগ সমস্যা হতে পারে (${lastStorageError || 'অজানা কারণ'})। আবার চেষ্টা করুন।`);
+      return;
+    }
+    client.role='player'; client.roomCode=code; client.myName=name;
+    startPolling();
+  };
+  card2.appendChild(joinBtn);
+  card2.appendChild(joinStatus);
+  wrap.appendChild(card2);
+
+  wrap.appendChild(el('div','footer-note','Fan-made digital aid for Polashi by Playground Inc. অফিসিয়াল পণ্য নয়।'));
+  return wrap;
+};
+
+/* ============ GAME SCREEN ROUTER ============ */
+SCREENS.gameScreen = function(){
+  const room = client.room;
+  const wrap = el('div');
+  if(client.role==='host') wrap.appendChild(el('div','host-badge','অ্যাডমিন প্যানেল'));
+  const banner = connectionBanner();
+  if(banner) wrap.appendChild(banner);
+
+  if(!room){
+    const card = el('div','card');
+    card.appendChild(el('div','waiting-box','<div class="spinner"></div><p>রুমের সাথে সংযোগ করা হচ্ছে...</p>'));
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  const game = room.game;
+  wrap.appendChild(el('div','title-block', `<div class="eyebrow">রুম কোড: ${client.roomCode}</div><h1>পলাশী</h1>`));
+
+  if(game.phase === 'lobby') wrap.appendChild(PHASE.lobby(room));
+  else if(game.phase === 'reveal') wrap.appendChild(PHASE.reveal(room));
+  else {
+    wrap.appendChild(chapterHeader(game));
+    if(game.phase === 'propose') wrap.appendChild(PHASE.propose(room));
+    else if(game.phase === 'vote') wrap.appendChild(PHASE.vote(room));
+    else if(game.phase === 'mission') wrap.appendChild(PHASE.mission(room));
+    else if(game.phase === 'chapterResult') wrap.appendChild(PHASE.chapterResult(room));
+    else if(game.phase === 'endgameGuess') wrap.appendChild(PHASE.endgameGuess(room));
+    else if(game.phase === 'gameOver') wrap.appendChild(PHASE.gameOver(room));
+  }
+  return wrap;
+};
+
+function chapterHeader(game){
+  const bar = el('div','progress-bar');
+  for(let i=0;i<5;i++){
+    let cls='map-card';
+    if(game.chapterResults[i]==='nawab') cls+=' won-nawab';
+    if(game.chapterResults[i]==='eic') cls+=' won-eic';
+    if(i===game.chapterIdx && game.phase!=='gameOver') cls+=' current';
+    bar.appendChild(el('div',cls, `${i+1}<br>${TEAM_SIZES[i]}জন`));
+  }
+  const wins={nawab:0,eic:0};
+  game.chapterResults.forEach(r=>wins[r]++);
+  const holder = el('div');
+  holder.appendChild(bar);
+  holder.appendChild(el('div','scoreline', `নবাব পক্ষ ${wins.nawab} — ${wins.eic} EIC পক্ষ   ·   প্রত্যাখ্যান: ${game.rejectCount}/5`));
+  return holder;
+}
+
+const PHASE = {};
+
+/* ---------------- LOBBY ---------------- */
+PHASE.lobby = function(room){
+  const wrap = el('div');
+  const card = el('div','card');
+  card.appendChild(el('h2','অপেক্ষাগৃহ (Lobby)'));
+  if(client.role==='host'){
+    card.appendChild(el('p', `সবাইকে রুম কোড দিন: `));
+    card.appendChild(el('div','code-display', client.roomCode));
+  } else {
+    card.appendChild(el('p', `স্বাগতম, ${client.myName}। বাকি খেলোয়াড়দের জন্য অপেক্ষা করা হচ্ছে...`));
+  }
+  const roster = el('div','roster');
+  room.players.forEach(p=>{
+    const row = el('div','roster-item');
+    row.innerHTML = `<span>${p.name}</span><span class="pill ready">যোগ দিয়েছেন</span>`;
+    roster.appendChild(row);
+  });
+  for(let i=room.players.length;i<NUM_PLAYERS;i++){
+    const row = el('div','roster-item');
+    row.innerHTML = `<span style="opacity:0.5">অপেক্ষমান আসন</span><span class="pill wait">খালি</span>`;
+    roster.appendChild(row);
+  }
+  card.appendChild(roster);
+
+  if(client.role==='host'){
+    const note = el('div','note-box', 'এই সংস্করণ ৫ জন খেলোয়াড়ের জন্য নির্দিষ্ট, বাস্তব রুলবুকে নিশ্চিত করা ভূমিকা বণ্টন অনুযায়ী: <strong>নবাব পক্ষ (৩)</strong> — নবাব সিরাজউদ্দৌলা, লুৎফুন্নেসা বেগম, মীর মদন। <strong>EIC পক্ষ (২)</strong> — মীর জাফর, ঘসেটি বেগম।');
+    card.appendChild(note);
+    const btn = el('button','btn btn-gold', `ভূমিকা বণ্টন করে খেলা শুরু করুন (${room.players.length}/${NUM_PLAYERS})`);
+    btn.disabled = room.players.length !== NUM_PLAYERS;
+    btn.onclick = async ()=>{
+      const roleList = shuffle([
+        ...NAWAB_ROLES.map(r=>({team:'nawab', roleId:r.id, bn:r.bn})),
+        ...EIC_ROLES.map(r=>({team:'eic', roleId:r.id, bn:r.bn})),
+      ]);
+      await mutateRoom(client.roomCode, (r)=>{
+        const order = shuffle(r.players.map(p=>p.name));
+        const roles = {};
+        order.forEach((name,i)=>{ roles[name] = roleList[i]; });
+        r.game = freshGame();
+        r.game.playersOrder = order;
+        r.game.roles = roles;
+        r.game.phase = 'reveal';
+        return r;
+      });
+    };
+    card.appendChild(btn);
+  }
+  wrap.appendChild(card);
+  return wrap;
+};
+
+/* ---------------- REVEAL ---------------- */
+PHASE.reveal = function(room){
+  const game = room.game;
+  const wrap = el('div');
+  const card = el('div','card');
+
+  if(client.role==='host'){
+    const readyCount = Object.keys(game.readyReveal||{}).length;
+    card.appendChild(el('h2','ভূমিকা দেখা হচ্ছে'));
+    card.appendChild(el('p','প্রত্যেক খেলোয়াড় তার নিজের ফোনে গোপনে ভূমিকা দেখছেন।'));
+    const roster = el('div','roster');
+    game.playersOrder.forEach(name=>{
+      const isReady = !!(game.readyReveal && game.readyReveal[name]);
+      const row = el('div','roster-item');
+      row.innerHTML = `<span>${name}</span><span class="pill ${isReady?'ready':'wait'}">${isReady?'প্রস্তুত':'দেখছেন...'}</span>`;
+      roster.appendChild(row);
+    });
+    card.appendChild(roster);
+    const btn = el('button','btn btn-gold', `অধ্যায় ১ শুরু করুন (${readyCount}/${NUM_PLAYERS})`);
+    btn.disabled = readyCount !== NUM_PLAYERS;
+    btn.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{
+        r.game.phase='propose';
+        return r;
+      });
+    };
+    card.appendChild(btn);
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  // player view
+  const myRole = game.roles[client.myName];
+  const alreadyReady = game.readyReveal && game.readyReveal[client.myName];
+
+  if(alreadyReady){
+    card.appendChild(el('div','waiting-box','<div class="spinner"></div><p>বাকি সবাই ভূমিকা দেখার অপেক্ষায়...</p>'));
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  card.appendChild(el('h2', 'আপনার ভূমিকা, ' + client.myName));
+  const localFlipped = client._sealFlipped;
+  if(!localFlipped){
+    const sealWrap = el('div','seal-wrap','<div class="seal" id="sealEl"><div class="seal-face seal-front">সীলমোহরে<br>ট্যাপ করুন</div></div>');
+    card.appendChild(sealWrap);
+    setTimeout(()=>{
+      const s = document.getElementById('sealEl');
+      if(s) s.onclick = ()=>{ client._sealFlipped = true; render(); };
+    },0);
+  } else {
+    const teamClass = myRole.team==='nawab' ? 'nawab-seal' : 'eic-seal';
+    const teamLabel = myRole.team==='nawab' ? 'নবাব পক্ষ' : 'EIC পক্ষ';
+    const sealWrap = el('div','seal-wrap');
+    sealWrap.innerHTML = `<div class="seal flipped"><div class="seal-face seal-back ${teamClass}">
+        <div class="char-name">${myRole.bn}</div><div class="team-name">${teamLabel}</div></div></div>`;
+    card.appendChild(sealWrap);
+    card.appendChild(el('p', myRole.team==='nawab'
+      ? 'আপনি নবাবের প্রতি অনুগত। আপনি জানেন না আপনার সহযোগীরা কারা। লক্ষ্যঃ ৫টির মধ্যে ৩টি অধ্যায় জেতা।'
+      : 'আপনি গোপনে EIC-র পক্ষে। ধরা না পড়ে অধ্যায়গুলো ব্যর্থ করে দিন।'));
+    if(myRole.team==='eic'){
+      const others = game.playersOrder.filter(n=> n!==client.myName && game.roles[n].team==='eic');
+      const box = el('div','note-box');
+      box.innerHTML = '<strong>আপনার সহযোগী EIC এজেন্ট:</strong><br>' + others.map(n=>`${n} — <em>${game.roles[n].bn}</em>`).join('<br>');
+      card.appendChild(box);
+    }
+    const btn = el('button','btn btn-outline','মনে রেখেছি — প্রস্তুত');
+    btn.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{
+        r.game.readyReveal = r.game.readyReveal || {};
+        r.game.readyReveal[client.myName] = true;
+        return r;
+      });
+      client._sealFlipped = false;
+    };
+    card.appendChild(btn);
+  }
+  wrap.appendChild(card);
+  return wrap;
+};
+
+/* ---------------- PROPOSE ---------------- */
+PHASE.propose = function(room){
+  const game = room.game;
+  const wrap = el('div');
+  const card = el('div','card');
+  const proposer = game.playersOrder[game.proposerIdx];
+  const teamSize = TEAM_SIZES[game.chapterIdx];
+
+  card.appendChild(el('h2', `অধ্যায় ${game.chapterIdx+1}: দল মনোনয়ন`));
+  card.appendChild(el('p', `সেনাপতি: <strong>${proposer}</strong> — ${teamSize} জনের দল বাছাই করবেন।`));
+
+  const isMyTurn = client.role==='player' && client.myName===proposer;
+
+  if(!isMyTurn){
+    card.appendChild(el('div','waiting-box', `<div class="spinner"></div><p>সেনাপতি ${proposer} দল বাছাই করছেন...</p>`));
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  const selected = client._selectedTeam || [];
+  const grid = el('div','chip-grid');
+  game.playersOrder.forEach(name=>{
+    const chip = el('div','chip'+(selected.includes(name)?' selected':''), name);
+    chip.onclick = ()=>{
+      if(selected.includes(name)) client._selectedTeam = selected.filter(n=>n!==name);
+      else if(selected.length < teamSize) client._selectedTeam = [...selected, name];
+      render();
+    };
+    grid.appendChild(chip);
+  });
+  card.appendChild(grid);
+
+  const btn = el('button','btn btn-gold', `দল চূড়ান্ত করুন (${selected.length}/${teamSize})`);
+  btn.disabled = selected.length !== teamSize;
+  btn.onclick = async ()=>{
+    await mutateRoom(client.roomCode, (r)=>{
+      r.game.selectedTeam = selected;
+      r.game.votes = {};
+      r.game.phase = 'vote';
+      return r;
+    });
+    client._selectedTeam = [];
+  };
+  card.appendChild(btn);
+  wrap.appendChild(card);
+  return wrap;
+};
+
+/* ---------------- VOTE ---------------- */
+PHASE.vote = function(room){
+  const game = room.game;
+  const wrap = el('div');
+  const card = el('div','card');
+  const teamNames = game.selectedTeam.join(', ');
+  card.appendChild(el('h2', `অধ্যায় ${game.chapterIdx+1}: পরিষদের ভোট`));
+  card.appendChild(el('p', `প্রস্তাবিত দলঃ ${teamNames}`));
+
+  const voteCount = Object.keys(game.votes||{}).length;
+
+  if(client.role==='host'){
+    card.appendChild(el('p', `ভোট জমা পড়েছে: ${voteCount}/${NUM_PLAYERS}`));
+    const btn = el('button','btn btn-gold','ভোটের ফলাফল প্রকাশ করুন');
+    btn.disabled = voteCount !== NUM_PLAYERS;
+    btn.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{
+        const approvals = Object.values(r.game.votes).filter(v=>v==='approve').length;
+        const rejections = Object.values(r.game.votes).filter(v=>v==='reject').length;
+        const approved = approvals > rejections;
+        r.game._lastVoteApproved = approved;
+        r.game._lastVoteTally = {approvals, rejections};
+        if(approved){
+          r.game.missionCards = {};
+          r.game.phase = 'mission';
+        } else {
+          r.game.rejectCount += 1;
+          if(r.game.rejectCount >= 5){
+            r.game.chapterResults[r.game.chapterIdx] = 'eic';
+            r.game.phase = 'chapterResult';
+          } else {
+            r.game.proposerIdx = (r.game.proposerIdx+1) % NUM_PLAYERS;
+            r.game.selectedTeam = [];
+            r.game.phase = 'propose';
+          }
+        }
+        return r;
+      });
+    };
+    card.appendChild(btn);
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  // player
+  const myVote = game.votes && game.votes[client.myName];
+  if(myVote){
+    card.appendChild(el('div','waiting-box', `<div class="spinner"></div><p>আপনার ভোট (${myVote==='approve'?'অনুমোদন':'প্রত্যাখ্যান'}) জমা হয়েছে। বাকিদের জন্য অপেক্ষা করুন। (${voteCount}/${NUM_PLAYERS})</p>`));
+  } else {
+    const row = el('div','btn-row');
+    const approveBtn = el('button','btn btn-nawab','অনুমোদন');
+    approveBtn.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{
+        r.game.votes = r.game.votes || {};
+        r.game.votes[client.myName] = 'approve';
+        return r;
+      });
+    };
+    const rejectBtn = el('button','btn btn-eic','প্রত্যাখ্যান');
+    rejectBtn.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{
+        r.game.votes = r.game.votes || {};
+        r.game.votes[client.myName] = 'reject';
+        return r;
+      });
+    };
+    row.appendChild(approveBtn); row.appendChild(rejectBtn);
+    card.appendChild(row);
+  }
+  wrap.appendChild(card);
+  return wrap;
+};
+
+/* ---------------- MISSION ---------------- */
+PHASE.mission = function(room){
+  const game = room.game;
+  const wrap = el('div');
+  const card = el('div','card');
+  card.appendChild(el('h2', `অধ্যায় ${game.chapterIdx+1} সংঘটিত হচ্ছে`));
+  card.appendChild(el('p', `দলঃ ${game.selectedTeam.join(', ')}`));
+
+  const playedCount = Object.keys(game.missionCards||{}).length;
+  const needed = game.selectedTeam.length;
+
+  if(client.role==='host'){
+    card.appendChild(el('p', `কার্ড জমা পড়েছে: ${playedCount}/${needed}`));
+    const btn = el('button','btn btn-gold','অধ্যায়ের ফলাফল প্রকাশ করুন');
+    btn.disabled = playedCount !== needed;
+    btn.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{
+        const betrayals = Object.values(r.game.missionCards).filter(v=>v==='betray').length;
+        const outcome = betrayals >= 1 ? 'eic' : 'nawab';
+        r.game.chapterResults[r.game.chapterIdx] = outcome;
+        r.game._lastBetrayals = betrayals;
+        r.game.phase = 'chapterResult';
+        return r;
+      });
+    };
+    card.appendChild(btn);
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  const onMission = game.selectedTeam.includes(client.myName);
+  if(!onMission){
+    card.appendChild(el('div','waiting-box', `<div class="spinner"></div><p>এই অধ্যায়ে আপনি নেই। দলের সিদ্ধান্তের অপেক্ষায়... (${playedCount}/${needed})</p>`));
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  const myCard = game.missionCards && game.missionCards[client.myName];
+  const myTeam = game.roles[client.myName].team;
+
+  if(myCard){
+    card.appendChild(el('div','waiting-box', `<div class="spinner"></div><p>আপনার কার্ড জমা হয়েছে। ফলাফলের অপেক্ষায়... (${playedCount}/${needed})</p>`));
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  card.appendChild(el('p','আপনার কার্ড খেলুন।'));
+  if(myTeam==='nawab'){
+    card.appendChild(el('p','নবাবের প্রতি অনুগত হিসেবে আপনি কেবল "সফল" খেলতে পারেন।'));
+    const btn = el('button','btn btn-nawab','সফল খেলুন');
+    btn.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{
+        r.game.missionCards = r.game.missionCards || {};
+        r.game.missionCards[client.myName] = 'success';
+        return r;
+      });
+    };
+    card.appendChild(btn);
+  } else {
+    card.appendChild(el('p','EIC এজেন্ট হিসেবে সতর্কভাবে বাছাই করুন — বিশ্বাসঘাতকতা প্রকাশ্য নয়, কিন্তু সন্দেহজনক হতে পারে।'));
+    const row = el('div','btn-row');
+    const s1 = el('button','btn btn-nawab','সফল');
+    s1.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{
+        r.game.missionCards = r.game.missionCards || {};
+        r.game.missionCards[client.myName] = 'success';
+        return r;
+      });
+    };
+    const s2 = el('button','btn btn-eic','বিশ্বাসঘাতক');
+    s2.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{
+        r.game.missionCards = r.game.missionCards || {};
+        r.game.missionCards[client.myName] = 'betray';
+        return r;
+      });
+    };
+    row.appendChild(s1); row.appendChild(s2);
+    card.appendChild(row);
+  }
+  wrap.appendChild(card);
+  return wrap;
+};
+
+/* ---------------- CHAPTER RESULT ---------------- */
+PHASE.chapterResult = function(room){
+  const game = room.game;
+  const wrap = el('div');
+  const card = el('div','card');
+  const outcome = game.chapterResults[game.chapterIdx];
+  card.appendChild(el('h2', `অধ্যায় ${game.chapterIdx+1}: ফলাফল`));
+  card.appendChild(el('div','result-banner '+outcome, outcome==='nawab' ? 'নবাব পক্ষ এই অধ্যায় জিতেছে' : 'EIC পক্ষ এই অধ্যায় জিতেছে'));
+
+  const wins={nawab:0,eic:0};
+  game.chapterResults.forEach(r=>wins[r]++);
+
+  if(client.role!=='host'){
+    card.appendChild(el('p','পরবর্তী ধাপের জন্য অপেক্ষা করুন...'));
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  if(wins.eic >= 3){
+    card.appendChild(el('p','EIC পক্ষ ৩টি অধ্যায় জিতে ফেলেছে — খেলা EIC-র জয়ে শেষ।'));
+    const btn = el('button','btn btn-gold','চূড়ান্ত ফলাফল দেখুন');
+    btn.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{ r.game.winner='eic'; r.game.phase='gameOver'; return r; });
+    };
+    card.appendChild(btn);
+  } else if(wins.nawab >= 3){
+    card.appendChild(el('p','নবাব পক্ষ ৩টি অধ্যায় জিতেছে! কিন্তু EIC পক্ষের শেষ সুযোগ বাকি — তারা যদি সঠিকভাবে মীর মদনকে চিহ্নিত করতে পারে, তবে জয় ছিনিয়ে নেবে।'));
+    const btn = el('button','btn btn-gold','EIC-র চূড়ান্ত অনুমান পর্বে যান');
+    btn.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{ r.game.phase='endgameGuess'; return r; });
+    };
+    card.appendChild(btn);
+  } else if(game.chapterIdx >= 4){
+    // shouldn't normally happen (someone should have 3 by chapter 5) but guard anyway
+    const winner = wins.nawab>wins.eic ? 'nawab':'eic';
+    const btn = el('button','btn btn-gold','চূড়ান্ত ফলাফল দেখুন');
+    btn.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{ r.game.winner=winner; r.game.phase='gameOver'; return r; });
+    };
+    card.appendChild(btn);
+  } else {
+    const btn = el('button','btn btn-gold', `অধ্যায় ${game.chapterIdx+2}-এ যান`);
+    btn.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{
+        r.game.chapterIdx += 1;
+        r.game.proposerIdx = (r.game.proposerIdx+1) % NUM_PLAYERS;
+        r.game.selectedTeam = [];
+        r.game.rejectCount = 0;
+        r.game.votes = {};
+        r.game.missionCards = {};
+        r.game.phase = 'propose';
+        return r;
+      });
+    };
+    card.appendChild(btn);
+  }
+  wrap.appendChild(card);
+  return wrap;
+};
+
+/* ---------------- ENDGAME GUESS (EIC identifies Mir Modon) ---------------- */
+PHASE.endgameGuess = function(room){
+  const game = room.game;
+  const wrap = el('div');
+  const card = el('div','card');
+  card.appendChild(el('h2','EIC-র চূড়ান্ত সুযোগ'));
+  card.appendChild(el('p','নবাব পক্ষ ৩টি অধ্যায় জিতেছে। কিন্তু EIC পক্ষ যদি সঠিকভাবে বলতে পারে কে "মীর মদন", তাহলে তারাই জিতবে।'));
+
+  if(game.eicGuess){
+    card.appendChild(el('div','waiting-box', `<div class="spinner"></div><p>অনুমান জমা হয়েছে (${game.eicGuess})। ফলাফলের অপেক্ষায়...</p>`));
+    if(client.role==='host'){
+      const btn = el('button','btn btn-gold','চূড়ান্ত ফলাফল প্রকাশ করুন');
+      btn.onclick = async ()=>{
+        await mutateRoom(client.roomCode, (r)=>{
+          const guessedRole = r.game.roles[r.game.eicGuess];
+          const correct = guessedRole && guessedRole.roleId === 'mirmodon';
+          r.game.winner = correct ? 'eic' : 'nawab';
+          r.game.phase = 'gameOver';
+          return r;
+        });
+      };
+      card.appendChild(btn);
+    }
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  const myTeam = client.role==='player' ? game.roles[client.myName].team : null;
+  if(client.role==='player' && myTeam==='eic'){
+    card.appendChild(el('p','আপনার দলের সাথে আলোচনা করে ঠিক করুন কে মীর মদন, তারপর বেছে নিন:'));
+    const grid = el('div','chip-grid');
+    game.playersOrder.forEach(name=>{
+      if(game.roles[name].team==='eic') return; // can't guess a fellow EIC agent
+      const chip = el('div','chip', name);
+      chip.onclick = async ()=>{
+        await mutateRoom(client.roomCode, (r)=>{
+          if(!r.game.eicGuess) r.game.eicGuess = name;
+          return r;
+        });
+      };
+      grid.appendChild(chip);
+    });
+    card.appendChild(grid);
+  } else {
+    card.appendChild(el('div','waiting-box','<div class="spinner"></div><p>EIC পক্ষ সিদ্ধান্ত নিচ্ছে...</p>'));
+  }
+  wrap.appendChild(card);
+  return wrap;
+};
+
+/* ---------------- GAME OVER ---------------- */
+PHASE.gameOver = function(room){
+  const game = room.game;
+  const wrap = el('div');
+  const card = el('div','card');
+  card.appendChild(el('div','result-banner '+game.winner, game.winner==='nawab' ? 'নবাব পক্ষ বিজয়ী' : 'EIC পক্ষ বিজয়ী'));
+  if(game.eicGuess){
+    const guessedRole = game.roles[game.eicGuess];
+    const correct = guessedRole && guessedRole.roleId==='mirmodon';
+    card.appendChild(el('p', `EIC-র অনুমান ছিল ${game.eicGuess} — ${correct ? 'সঠিক!' : 'ভুল।'}`));
+  }
+  card.appendChild(el('h3','সব ভূমিকা প্রকাশ'));
+  const roster = el('div','roster');
+  game.playersOrder.forEach(name=>{
+    const role = game.roles[name];
+    const row = el('div','roster-item');
+    row.innerHTML = `<span>${name} — <em>${role.bn}</em></span><span class="tag ${role.team}">${role.team==='nawab'?'নবাব':'EIC'}</span>`;
+    roster.appendChild(row);
+  });
+  card.appendChild(roster);
+
+  if(client.role==='host'){
+    const btn = el('button','btn btn-gold','নতুন খেলা শুরু করুন (একই কোড)');
+    btn.onclick = async ()=>{
+      await mutateRoom(client.roomCode, (r)=>{
+        r.game = freshGame();
+        return r;
+      });
+    };
+    card.appendChild(btn);
+  }
+  wrap.appendChild(card);
+  return wrap;
+};
+
+render();
+</script>
+</body>
+</html>
