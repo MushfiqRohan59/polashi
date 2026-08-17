@@ -515,7 +515,7 @@ function chapterHeader(game){
   game.chapterResults.forEach(r=>wins[r]++);
   const holder = el('div');
   holder.appendChild(bar);
-  holder.appendChild(el('div','scoreline', `নবাব পক্ষ ${wins.nawab} — ${wins.eic} EIC পক্ষ   ·   প্রত্যাখ্যান: ${game.rejectCount}/5`));
+  holder.appendChild(el('div','scoreline', `নবাব পক্ষ ${wins.nawab} — ${wins.eic} EIC পক্ষ   ·   টানা ব্যর্থ দল গঠন: ${game.rejectCount}/5`));
   return holder;
 }
 
@@ -641,6 +641,11 @@ PHASE.reveal = function(room){
       const box = el('div','note-box');
       box.innerHTML = '<strong>আপনার সহযোগী EIC এজেন্ট:</strong><br>' + others.map(n=>`${n} — <em>${game.roles[n].bn}</em>`).join('<br>');
       card.appendChild(box);
+    } else if(myRole.team==='nawab' && myRole.roleId==='mirmodon'){
+      const eicMembers = game.playersOrder.filter(n=> game.roles[n].team==='eic');
+      const box = el('div','note-box');
+      box.innerHTML = '<strong>আপনি জানেন এরা EIC পক্ষে আছে:</strong><br>' + eicMembers.map(n=>`${n} — <em>${game.roles[n].bn}</em>`).join('<br>');
+      card.appendChild(box);
     }
     const btn = el('button','btn btn-outline','মনে রেখেছি — প্রস্তুত');
     btn.onclick = ()=> submitAction(btn, async ()=>{
@@ -729,13 +734,14 @@ PHASE.vote = function(room){
         r.game._lastVoteApproved = approved;
         r.game._lastVoteTally = {approvals, rejections};
         if(approved){
+          r.game.rejectCount = 0;
           r.game.missionCards = {};
           r.game.phase = 'mission';
         } else {
           r.game.rejectCount += 1;
           if(r.game.rejectCount >= 5){
-            r.game.chapterResults[r.game.chapterIdx] = 'eic';
-            r.game.phase = 'chapterResult';
+            r.game.winner = 'eic';
+            r.game.phase = 'gameOver';
           } else {
             r.game.proposerIdx = (r.game.proposerIdx+1) % NUM_PLAYERS;
             r.game.selectedTeam = [];
@@ -927,18 +933,29 @@ PHASE.endgameGuess = function(room){
     return wrap;
   }
 
-  const myTeam = client.role==='player' ? game.roles[client.myName].team : null;
+  const myRole2 = client.role==='player' ? game.roles[client.myName] : null;
+  const myTeam = myRole2 ? myRole2.team : null;
   if(client.role==='player' && myTeam==='eic'){
+    const isMirJafar = myRole2.roleId==='mirjafar';
     card.appendChild(el('p','আপনার দলের সাথে আলোচনা করে ঠিক করুন কে মীর মদন, তারপর বেছে নিন:'));
+    if(!isMirJafar){
+      card.appendChild(el('div','note-box','মীরজাফর চূড়ান্ত অনুমান জমা দেবে।'));
+    }
     const grid = el('div','chip-grid');
     const chips = [];
     game.playersOrder.forEach(name=>{
       if(game.roles[name].team==='eic') return; // can't guess a fellow EIC agent
       const chip = el('div','chip', name);
-      chip.onclick = ()=> submitChipAction(chip, chips, ()=> mutateRoom(client.roomCode, (r)=>{
-          if(!r.game.eicGuess) r.game.eicGuess = name;
-          return r;
-        }));
+      if(isMirJafar){
+        chip.onclick = ()=> submitChipAction(chip, chips, ()=> mutateRoom(client.roomCode, (r)=>{
+            if(!r.game.eicGuess) r.game.eicGuess = name;
+            return r;
+          }));
+      } else {
+        chip.style.pointerEvents = 'none';
+        chip.style.opacity = '0.6';
+        chip.style.cursor = 'default';
+      }
       chips.push(chip);
       grid.appendChild(chip);
     });
