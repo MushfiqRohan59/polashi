@@ -153,6 +153,24 @@ async function withRetry(fn, attempts=4, baseDelay=350){
 // only inside Claude.ai. Rooms are stored at {FIREBASE_DB_URL}/rooms/{code}.json
 const FIREBASE_DB_URL = 'https://polashi-game-default-rtdb.asia-southeast1.firebasedatabase.app';
 
+// Firebase silently drops empty arrays/objects on write instead of storing them,
+// so a field that was [] or {} at save time comes back as `undefined` on read.
+// Patch the shape back in right here so every caller can keep assuming
+// room.players is an array and room.game.* has its normal type.
+function normalizeRoom(room){
+  if(!room) return room;
+  room.players = room.players || [];
+  const g = room.game = room.game || {};
+  g.playersOrder = g.playersOrder || [];
+  g.roles = g.roles || {};
+  g.readyReveal = g.readyReveal || {};
+  g.selectedTeam = g.selectedTeam || [];
+  g.votes = g.votes || {};
+  g.missionCards = g.missionCards || {};
+  g.chapterResults = g.chapterResults || [];
+  return room;
+}
+
 async function loadRoom(code){
   try{
     const res = await withRetry(async ()=>{
@@ -161,7 +179,7 @@ async function loadRoom(code){
       return resp.json(); // null if the path doesn't exist yet -- not an error
     });
     lastStorageError = null;
-    return res || null;
+    return normalizeRoom(res) || null;
   }catch(e){
     lastStorageError = (e && e.message) ? e.message : String(e);
     console.error('load failed', e);
