@@ -99,6 +99,45 @@
   .tag.eic{ background:var(--eic); color:#F5E7E7;}
   .footer-note{ text-align:center; font-size:12px; color:rgba(237,225,200,0.5); margin-top:18px; line-height:1.5; position:relative; z-index:1;}
   .host-badge{ display:inline-block; background:var(--gold); color:var(--navy-deep); font-family:'Cinzel',serif; font-size:10px; letter-spacing:0.1em; padding:3px 8px; border-radius:3px; margin-bottom:10px;}
+  .btn-ghost{ background:rgba(228,193,88,0.1); border:1.5px solid var(--gold); color:var(--gold-bright);}
+  .corner-bar{ display:flex; justify-content:flex-end; margin-bottom:6px; position:relative; z-index:1;}
+  .corner-link{ font-family:'Noto Sans Bengali',serif; font-size:12px; background:none; border:none; cursor:pointer; padding:4px 8px; text-decoration:underline; touch-action:manipulation; color:rgba(237,225,200,0.65);}
+  .corner-link.danger{ color:#e2938f;}
+  .corner-link:active{ opacity:0.65;}
+  .rulebook-back{ display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--gold-bright); font-family:'Noto Sans Bengali',serif; font-size:14px; font-weight:700; cursor:pointer; padding:6px 0; margin-bottom:8px; touch-action:manipulation;}
+  .rulebook-tabs{ display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 14px;}
+  .rulebook-tab{ flex:1 1 auto; min-width:64px; padding:9px 6px; border-radius:20px; border:1.5px solid rgba(42,33,23,0.3); background:#F7F0DE; font-family:'Noto Sans Bengali',serif; font-size:12.5px; font-weight:600; cursor:pointer; color:var(--ink); text-align:center; touch-action:manipulation; transition:transform .12s ease, filter .12s ease;}
+  .rulebook-tab.active{ background:var(--gold); border-color:var(--gold); color:var(--navy-deep); font-weight:700;}
+  .rulebook-tab:active{ transform:scale(0.96);}
+  .rulebook-section h3{ font-size:17px; margin:18px 0 6px; color:var(--ink);}
+  .rulebook-section h3:first-child{ margin-top:0;}
+  .rulebook-section p{ line-height:1.65;}
+  .char-group-label{ font-family:'Cinzel',serif; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#8a6d15; margin:16px 0 6px;}
+  .char-card-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:6px 0 12px;}
+  .char-card{ border-radius:6px; overflow:hidden; border:1.5px solid rgba(42,33,23,0.15); background:#F7F0DE; box-shadow:0 3px 8px rgba(0,0,0,0.12); display:flex; flex-direction:column;}
+  .char-card-portrait{ height:40px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:20px; color:rgba(255,255,255,0.85);}
+  .char-card-portrait.nawab{ background:radial-gradient(circle, var(--nawab-bright), var(--nawab) 80%);}
+  .char-card-portrait.eic{ background:radial-gradient(circle, var(--eic-bright), var(--eic) 80%);}
+  .char-card-banner{ padding:8px 10px 6px; font-family:'Tiro Bangla',serif; font-size:14.5px; font-weight:700; color:#fff;}
+  .char-card-banner.nawab{ background:linear-gradient(180deg, var(--nawab-bright), var(--nawab));}
+  .char-card-banner.eic{ background:linear-gradient(180deg, var(--eic-bright), var(--eic));}
+  .char-card-meta{ display:block; font-family:'Noto Sans Bengali',serif; font-size:10px; font-weight:600; opacity:0.85; margin-top:2px;}
+  .char-card-body{ padding:9px 10px 11px; font-size:12.5px; line-height:1.55; color:var(--ink); flex:1;}
+  .rulebook-table{ width:100%; border-collapse:collapse; margin:12px 0; font-size:13px;}
+  .rulebook-table th, .rulebook-table td{ border:1px solid rgba(42,33,23,0.15); padding:6px 4px; text-align:center;}
+  .rulebook-table th{ background:rgba(42,33,23,0.06); font-weight:700; font-size:11px;}
+  .rulebook-table td.row-nawab{ background:rgba(47,82,51,0.14); color:var(--nawab); font-weight:700;}
+  .rulebook-table td.row-eic{ background:rgba(122,46,46,0.14); color:var(--eic); font-weight:700;}
+  .rulebook-table th.row-label{ background:rgba(42,33,23,0.06); font-weight:700; text-align:right; font-size:11px;}
+  .rulebook-note{ background:rgba(201,162,39,0.12); border-left:3px solid var(--gold); border-radius:0 4px 4px 0; padding:10px 12px; font-size:13px; color:#6b5220; margin:12px 0; line-height:1.55;}
+  .step-list{ margin:10px 0; padding-left:0; list-style:none; counter-reset:step;}
+  .step-list li{ counter-increment:step; position:relative; padding:8px 0 8px 34px; font-size:14.5px; line-height:1.55; border-bottom:1px solid rgba(42,33,23,0.1);}
+  .step-list li:last-child{ border-bottom:none;}
+  .step-list li::before{ content:counter(step); position:absolute; left:0; top:8px; width:24px; height:24px; border-radius:50%; background:var(--gold); color:var(--navy-deep); font-family:'Cinzel',serif; font-weight:700; font-size:12.5px; display:flex; align-items:center; justify-content:center;}
+  .team-box{ border-radius:4px; padding:12px 14px; font-size:13.5px; line-height:1.55; margin:12px 0;}
+  .team-box.nawab{ background:rgba(47,82,51,0.1); border-left:4px solid var(--nawab);}
+  .team-box.eic{ background:rgba(122,46,46,0.1); border-left:4px solid var(--eic);}
+  .team-box strong{ display:block; margin-bottom:4px; font-size:14.5px;}
 </style>
 </head>
 <body>
@@ -289,6 +328,42 @@ async function mutateRoom(code, mutator){
   return updated;
 }
 
+async function deleteRoom(code){
+  try{
+    await withRetry(async ()=>{
+      const resp = await fetch(`${FIREBASE_DB_URL}/rooms/${code}.json`, { method: 'DELETE' });
+      if(!resp.ok) throw new Error('Firebase DELETE failed: HTTP ' + resp.status);
+    });
+    lastStorageError = null;
+    return true;
+  }catch(e){
+    lastStorageError = (e && e.message) ? e.message : String(e);
+    console.error('delete failed', e);
+    return false;
+  }
+}
+
+/* ============ SESSION PERSISTENCE (localStorage, survives reloads) ============ */
+const SESSION_KEY = 'polashi_session';
+function saveSession(){
+  try{
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      roomCode: client.roomCode,
+      myName: client.myName,
+      role: client.role,
+    }));
+  }catch(e){ /* localStorage unavailable (private mode etc) -- session just won't persist */ }
+}
+function loadSession(){
+  try{
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function clearSession(){
+  try{ localStorage.removeItem(SESSION_KEY); }catch(e){}
+}
+
 function freshGame(numPlayers){
   return {
     phase: 'lobby', // lobby, reveal, propose, vote, mission, chapterResult, endgameGuess, gameOver
@@ -360,18 +435,35 @@ const client = {
   myName: null,
   room: null,        // {players:[], game:{...}} cached from last poll
   pollTimer: null,
+  roomClosed: false, // true once a poll confirms the host deleted the room
 };
 
 function render(){
   const app = document.getElementById('app');
   app.innerHTML = '';
-  app.appendChild(SCREENS.landing_or_active());
+  if(client._showRulebook && !client.roomClosed){
+    app.appendChild(SCREENS.rulebook());
+  } else {
+    app.appendChild(SCREENS.landing_or_active());
+  }
 }
 
 function startPolling(){
   if(client.pollTimer) clearInterval(client.pollTimer);
   const tick = async ()=>{
     const room = await loadRoom(client.roomCode);
+    // A successful fetch (no storage error) that returns null means the room
+    // genuinely no longer exists -- most commonly the host closed it. Distinct
+    // from a transient network hiccup, which also returns null but leaves
+    // lastStorageError set; that case falls through to the branch below and
+    // keeps showing the last known state instead.
+    if(room === null && !lastStorageError){
+      clearSession();
+      client.roomClosed = true;
+      if(client.pollTimer){ clearInterval(client.pollTimer); client.pollTimer = null; }
+      render();
+      return;
+    }
     // Don't blank out a screen we already had just because one poll hiccuped —
     // keep showing the last known state and surface a small connection notice instead.
     if(room !== null || !client.room){
@@ -383,6 +475,20 @@ function startPolling(){
   client.pollTimer = setInterval(tick, 1100);
 }
 
+// Fully local reset back to the landing screen: stops polling, wipes client
+// state and the persisted session, and re-renders. Used by leave/close-room
+// and the "room closed" screen's back button.
+function resetClientToLanding(){
+  if(client.pollTimer){ clearInterval(client.pollTimer); client.pollTimer = null; }
+  client.role = null;
+  client.roomCode = null;
+  client.myName = null;
+  client.room = null;
+  client.roomClosed = false;
+  clearSession();
+  render();
+}
+
 function connectionBanner(){
   if(!lastStorageError) return null;
   const box = el('div','note-box','⚠️ সংযোগে সাময়িক সমস্যা হচ্ছে ('+lastStorageError+') — স্বয়ংক্রিয়ভাবে আবার চেষ্টা করা হচ্ছে।');
@@ -390,10 +496,176 @@ function connectionBanner(){
   return box;
 }
 
+/* ============ RULEBOOK (pure content screen -- no game-state interaction) ============ */
+const RULEBOOK_TABS = [
+  {id:'intro', label:'ভূমিকা'},
+  {id:'chars', label:'চরিত্র'},
+  {id:'counts', label:'খেলোয়াড় সংখ্যা'},
+  {id:'flow', label:'ধাপে ধাপে খেলা'},
+  {id:'end', label:'জয়-পরাজয়'},
+];
+const RULEBOOK_CHARACTERS = [
+  {name:'মীর মদন', team:'nawab', group:'always', tag:'সর্বদা উপস্থিত',
+   text:'পলাশীর যুদ্ধের সেই বীর সেনাপতি, যিনি ইংরেজদের বিরুদ্ধে সবচেয়ে সাহসী লড়াই করেছিলেন। এই খেলায় তিনি নবাব পক্ষের একমাত্র মানুষ যিনি জানেন কারা EIC পক্ষে আছে — খেলা শুরুর সময়ই তিনি তাদের চিনে নেন। কিন্তু সাবধান — যদি রায় দুর্লভ খেলায় থাকেন (৭+ খেলোয়াড়), তিনি তার নজর এড়িয়ে যান, তাকে মীর মদন চিনতে পারেন না।'},
+  {name:'মীর জাফর', team:'eic', group:'always', tag:'সর্বদা উপস্থিত',
+   text:'ইতিহাসের সবচেয়ে আলোচিত বিশ্বাসঘাতক। EIC পক্ষের বাকিদের মতো তিনিও খেলার শুরু থেকে তার দলের সবাইকে চেনেন। খেলার একেবারে শেষ মুহূর্তে, যদি নবাব পক্ষ তিনটি অধ্যায় জিতে ফেলে, তাহলে দলের আলোচনার পর চূড়ান্ত সিদ্ধান্তটা তাকেই নিতে হয় — কে আসল মীর মদন, তা অনুমান করে EIC পক্ষের শেষ সুযোগটা ব্যবহার করা।'},
+  {name:'নবাব সিরাজউদ্দৌলা', team:'nawab', group:'base', tag:'মূল চরিত্র (৫+)',
+   text:'বাংলার শেষ স্বাধীন নবাব। কোনো বিশেষ ক্ষমতা নেই — একজন সাধারণ নবাব-পক্ষীয় খেলোয়াড় হিসেবেই তিনি খেলেন, বাকি সবার মতোই অন্ধকারে থেকে নিজের দলকে বিশ্বাস করার চেষ্টা করেন।'},
+  {name:'লুৎফুন্নেসা বেগম', team:'nawab', group:'base', tag:'মূল চরিত্র (৫+)',
+   text:'নবাব সিরাজউদ্দৌলার স্ত্রী। তারও কোনো বিশেষ ক্ষমতা নেই — একজন সাধারণ নবাব-পক্ষীয় সদস্য হিসেবেই খেলেন।'},
+  {name:'ঘসেটি বেগম', team:'eic', group:'base', tag:'মূল চরিত্র (৫+)',
+   text:'আলীবর্দী খাঁর কন্যা এবং সিরাজউদ্দৌলার বিরুদ্ধে ষড়যন্ত্রকারীদের একজন। তার একটি বিশেষ, ছলনাপূর্ণ ক্ষমতা আছে — যদি মোহন লাল খেলায় থাকেন (৬+ খেলোয়াড়), তিনি নিজেকে মীর মদন হিসেবে দেখাতে পারেন, যার ফলে মোহন লাল বিভ্রান্ত হয়ে পড়েন সত্যিকারের মীর মদন কে তা নিয়ে।'},
+  {name:'মোহন লাল', team:'nawab', group:'special', tag:'৬+ খেলোয়াড়ের খেলায় যুক্ত হন',
+   text:'সিরাজউদ্দৌলার প্রতি অবিচল বিশ্বস্ত এক সেনাপতি, যিনি যুদ্ধক্ষেত্রে বীরের মতো লড়ে প্রাণ দিয়েছিলেন। এই খেলায় তিনি মীর মদনকে খুঁজে বের করার চেষ্টা করেন — কিন্তু ঘসেটি বেগম যদি খেলায় থাকেন, তিনি দুজনের নাম দেখেন (আসল মীর মদন + ঘসেটি বেগম), কোনটা কে তা না জানিয়েই। তাকে অনুমান করে বুঝে নিতে হয় কে সত্যিকারের মীর মদন।'},
+  {name:'রায় দুর্লভ', team:'eic', group:'special', tag:'৭+ খেলোয়াড়ের খেলায় যুক্ত হন',
+   text:'ইতিহাসে তিনি ছিলেন সিরাজউদ্দৌলার বিরুদ্ধে অন্যতম ষড়যন্ত্রকারী, যুদ্ধক্ষেত্রে নীরব দর্শকের মতো দাঁড়িয়ে থেকেছিলেন। এই খেলায় তার বিশেষত্ব হলো — তিনি মীর মদনের নজর এড়িয়ে যান। অর্থাৎ মীর মদন EIC পক্ষের বাকিদের চিনলেও, রায় দুর্লভকে তিনি চিনতে পারেন না।'},
+  {name:'সেইন্ট ফ্রে', team:'nawab', group:'special', tag:'৮+ খেলোয়াড়ের খেলায় যুক্ত হন',
+   text:'নবাবের পক্ষে যুদ্ধ করা একজন ফরাসি সেনাপতি, যিনি শেষ পর্যন্ত মোহন লালের পাশে থেকে লড়েছিলেন। এই খেলায় কোনো বিশেষ ক্ষমতা নেই — একজন অতিরিক্ত নবাব-পক্ষীয় সদস্য হিসেবেই যুক্ত হন, যখন খেলোয়াড় সংখ্যা বেড়ে যায়।'},
+  {name:'নবাব-পক্ষের অতিরিক্ত সৈনিক', team:'nawab', group:'special', tag:'৯+ খেলোয়াড়ে যুক্ত হন',
+   text:'কোনো বিশেষ ক্ষমতা নেই। খেলোয়াড় সংখ্যা বাড়লে দল ভারসাম্য রাখতে আরেকজন নবাব-পক্ষীয় সদস্য প্রয়োজন হয়।'},
+  {name:'EIC-পক্ষের অতিরিক্ত সৈনিক', team:'eic', group:'special', tag:'১০ খেলোয়াড়ে যুক্ত হন',
+   text:'কোনো বিশেষ ক্ষমতা নেই। ১০ জনের খেলায় EIC পক্ষে আরেকজন সদস্য যুক্ত হয়ে দলের ভারসাম্য ঠিক রাখে।'},
+];
+function renderCharCard(c){
+  const initial = c.name.trim().charAt(0);
+  return `<div class="char-card">
+    <div class="char-card-portrait ${c.team}">${initial}</div>
+    <div class="char-card-banner ${c.team}">${c.name}<span class="char-card-meta">${c.tag}</span></div>
+    <div class="char-card-body">${c.text}</div>
+  </div>`;
+}
+function rulebookIntroHTML(){
+  return `<div class="rulebook-section">
+    <h3>ভূমিকা</h3>
+    <p>পলাশী একটি সামাজিক প্রতারণার খেলা (social deduction game), যার প্রেক্ষাপট ১৭৫৭ সালের ঐতিহাসিক পলাশীর যুদ্ধ। এই যুদ্ধেই বাংলার শেষ স্বাধীন নবাব সিরাজউদ্দৌলা তার নিজের অতি বিশ্বস্ত মানুষদের বিশ্বাসঘাতকতার শিকার হয়ে ইস্ট ইন্ডিয়া কোম্পানির কাছে পরাজিত হয়েছিলেন। এই খেলায় আপনি সেই ইতিহাসই আবার বাঁচবেন — কিন্তু এবার আপনি জানেন না কে বন্ধু, আর কে শত্রু।</p>
+    <p>৫ থেকে ১০ জন খেলোয়াড় দুটি পক্ষে ভাগ হয়ে খেলবেন — নবাব পক্ষ (সবুজ) এবং ইস্ট ইন্ডিয়া কোম্পানি বা EIC পক্ষ (লাল)। প্রত্যেক খেলোয়াড়কে গোপনে একটি চরিত্র দেওয়া হবে, যা থেকেই তার পক্ষ ঠিক হবে। EIC পক্ষ নিজেদের মধ্যে একে অপরকে চিনবে, কিন্তু নবাব পক্ষের বেশিরভাগ মানুষ একেবারে অন্ধকারে থাকবেন — নিজের দলের প্রকৃত সদস্যরাও অজানা।</p>
+    <h3>দুই পক্ষ ও লক্ষ্য</h3>
+    <div class="team-box nawab"><strong>নবাব পক্ষ (সবুজ সীলমোহর)</strong>লক্ষ্য — পাঁচটি অধ্যায়ের মধ্যে তিনটিতে জয়লাভ করা। প্রতিটি মিশনে তাদের অবশ্যই সফলতার কার্ড খেলতে হবে — বিশ্বাসঘাতকতার কোনো সুযোগ নেই তাদের জন্য। সমস্যা হলো, তারা জানে না কে তাদেরই দলের প্রকৃত সদস্য (মীর মদন ছাড়া, যিনি বিশেষভাবে জানেন)।</div>
+    <div class="team-box eic"><strong>EIC পক্ষ (লাল সীলমোহর)</strong>লক্ষ্য — বিশ্বাসঘাতকতার মাধ্যমে নবাব পক্ষকে ব্যর্থ করে দেওয়া, অথবা টানা প্রস্তাব প্রত্যাখ্যান করিয়ে বিভ্রান্তি তৈরি করা। তারা খেলার শুরু থেকেই একে অপরকে চেনে এবং একসাথে কৌশল সাজাতে পারে — এটাই তাদের সবচেয়ে বড় সুবিধা।</div>
+  </div>`;
+}
+function rulebookCharsHTML(){
+  const groups = [
+    {key:'always', label:'সর্বদা উপস্থিত'},
+    {key:'base', label:'মূল চরিত্র'},
+    {key:'special', label:'বিশেষ ক্ষমতাসম্পন্ন চরিত্র'},
+  ];
+  let html = `<div class="rulebook-section"><h3>চরিত্র পরিচিতি</h3>`;
+  groups.forEach(g=>{
+    html += `<div class="char-group-label">${g.label}</div><div class="char-card-grid">`;
+    RULEBOOK_CHARACTERS.filter(c=>c.group===g.key).forEach(c=>{ html += renderCharCard(c); });
+    html += `</div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+function rulebookCountsHTML(){
+  return `<div class="rulebook-section">
+    <h3>খেলোয়াড় সংখ্যা অনুযায়ী পার্থক্য</h3>
+    <p>খেলোয়াড় সংখ্যা বাড়লে দুই পক্ষের সদস্য সংখ্যা এবং কোন কোন চরিত্র খেলায় থাকবে, তা বদলে যায়। নিচে প্রতিটি সংখ্যার জন্য বিস্তারিত দেওয়া হলো।</p>
+    <div style="overflow-x:auto;"><table class="rulebook-table">
+      <tr><th>প্লেয়ার সংখ্যা</th><th>৫</th><th>৬</th><th>৭</th><th>৮</th><th>৯</th><th>১০</th></tr>
+      <tr><th class="row-label">নবাব পক্ষ</th><td class="row-nawab">৩</td><td class="row-nawab">৪</td><td class="row-nawab">৪</td><td class="row-nawab">৫</td><td class="row-nawab">৬</td><td class="row-nawab">৬</td></tr>
+      <tr><th class="row-label">EIC পক্ষ</th><td class="row-eic">২</td><td class="row-eic">২</td><td class="row-eic">৩</td><td class="row-eic">৩</td><td class="row-eic">৩</td><td class="row-eic">৪</td></tr>
+    </table></div>
+    <p><strong>৫ জন:</strong> নবাব পক্ষ (৩) — নবাব সিরাজউদ্দৌলা, লুৎফুন্নেসা বেগম, মীর মদন। EIC পক্ষ (২) — মীর জাফর, ঘসেটি বেগম। সবচেয়ে সহজ ও প্রাথমিক সংস্করণ, নতুন খেলোয়াড়দের জন্য আদর্শ শুরু।</p>
+    <p><strong>৬ জন:</strong> নবাব পক্ষ (৪) — আগের তিনজনের সাথে যুক্ত হন মোহন লাল। EIC পক্ষ (২) — অপরিবর্তিত। এখান থেকেই মোহন লাল ও ঘসেটি বেগমের ছলনার খেলা শুরু হয়।</p>
+    <p><strong>৭ জন:</strong> নবাব পক্ষ (৪) — অপরিবর্তিত। EIC পক্ষ (৩) — যুক্ত হন রায় দুর্লভ, যিনি মীর মদনের চোখ এড়িয়ে যান। এই সংখ্যা থেকেই ৪র্থ অধ্যায়ে বিশেষ নিয়ম চালু হয় (নিচে দেখুন)।</p>
+    <p><strong>৮ জন:</strong> নবাব পক্ষ (৫) — যুক্ত হন সেইন্ট ফ্রে। EIC পক্ষ (৩) — অপরিবর্তিত।</p>
+    <p><strong>৯ জন:</strong> নবাব পক্ষ (৬) — যুক্ত হন একজন অতিরিক্ত সৈনিক। EIC পক্ষ (৩) — অপরিবর্তিত।</p>
+    <p><strong>১০ জন:</strong> নবাব পক্ষ (৬) — অপরিবর্তিত। EIC পক্ষ (৪) — যুক্ত হন একজন অতিরিক্ত সৈনিক। সবচেয়ে বড়, সবচেয়ে জটিল এবং সবচেয়ে উত্তেজনাপূর্ণ সংস্করণ!</p>
+    <h3>অধ্যায় অনুযায়ী দলের আকার</h3>
+    <p>প্রতিটি অধ্যায়ে দলের আকার খেলোয়াড় সংখ্যার উপর নির্ভর করে বদলে যায় — এবং মজার ব্যাপার হলো, দলের আকার সবসময় বাড়তেই থাকে না, মাঝেমধ্যে ছোটও হয়ে যায়, যা খেলাকে আরও অনিশ্চিত করে তোলে।</p>
+    <div style="overflow-x:auto;"><table class="rulebook-table">
+      <tr><th>প্লেয়ার সংখ্যা</th><th>৫</th><th>৬</th><th>৭</th><th>৮</th><th>৯</th><th>১০</th></tr>
+      <tr><th class="row-label">১ম অধ্যায়</th><td>২</td><td>২</td><td>২</td><td>৩</td><td>৩</td><td>৩</td></tr>
+      <tr><th class="row-label">২য় অধ্যায়</th><td>৩</td><td>৩</td><td>৩</td><td>৪</td><td>৪</td><td>৪</td></tr>
+      <tr><th class="row-label">৩য় অধ্যায়</th><td>২</td><td>৪</td><td>৩</td><td>৪</td><td>৪</td><td>৪</td></tr>
+      <tr><th class="row-label">৪র্থ অধ্যায়</th><td>৩</td><td>৩</td><td>৪*</td><td>৫*</td><td>৫*</td><td>৫*</td></tr>
+      <tr><th class="row-label">৫ম অধ্যায়</th><td>৩</td><td>৪</td><td>৪</td><td>৬</td><td>৬</td><td>৬</td></tr>
+    </table></div>
+    <div class="rulebook-note"><strong>তারকাচিহ্নিত (*) ঘরের বিশেষ নিয়ম:</strong> ৭ বা তার বেশি খেলোয়াড়ের খেলায়, ৪র্থ অধ্যায়ে EIC পক্ষের জয়ের জন্য অন্তত ২টি বিশ্বাসঘাতক কার্ড প্রয়োজন — শুধু ১টি কার্ডে এই একটি অধ্যায়ে নবাব পক্ষই জয়ী হবে। বাকি সব অধ্যায়ে, এবং ৫-৬ খেলোয়াড়ের খেলায় ৪র্থ অধ্যায়েও, স্বাভাবিক নিয়মই চলে — একটি বিশ্বাসঘাতক কার্ডই EIC পক্ষের জয়ের জন্য যথেষ্ট।</div>
+  </div>`;
+}
+function rulebookFlowHTML(){
+  return `<div class="rulebook-section">
+    <h3>খেলা শুরু</h3>
+    <ol class="step-list">
+      <li>হোস্ট খেলোয়াড় সংখ্যা (৫-১০) বেছে নেবেন এবং রুম তৈরি করবেন।</li>
+      <li>সবাই রুম কোড দিয়ে যোগ দেবেন।</li>
+      <li>সবাই যোগ দিলে হোস্ট "ভূমিকা বণ্টন" চাপবেন — প্রত্যেকের ফোনে গোপনে একটি চরিত্র দেখানো হবে।</li>
+      <li>প্রত্যেকে নিজের চরিত্র মনে রাখবেন। EIC পক্ষ নিজেদের মধ্যে একে অপরকে দেখতে পাবে, আর মীর মদন দেখতে পাবেন কারা EIC পক্ষে (রায় দুর্লভ ছাড়া, যদি তিনি খেলায় থাকেন)। মোহন লাল থাকলে তিনি মীর মদন খুঁজে বের করার একটা সূত্র পাবেন।</li>
+    </ol>
+    <h3>অধ্যায় পর্ব (প্রতি রাউন্ডে যা ঘটে)</h3>
+    <ol class="step-list">
+      <li><strong>দল গঠন:</strong> বর্তমান সেনাপতি (প্রতি অধ্যায়ে বদলায়) নির্দিষ্ট সংখ্যক সদস্য নিয়ে একটি দল প্রস্তাব করবেন (কতজন লাগবে তা উপরের টেবিল অনুযায়ী)।</li>
+      <li><strong>ভোট:</strong> সবাই গোপনে হ্যাঁ/না ভোট দেবেন। বেশি হ্যাঁ ভোট পেলে দল গঠিত হবে এবং মিশনে যাবে। নাহলে পরবর্তী খেলোয়াড় নতুন সেনাপতি হয়ে আবার চেষ্টা করবেন। মনে রাখবেন — একই অধ্যায়ে টানা ৫ বার প্রস্তাব ব্যর্থ হলে EIC পক্ষ সাথে সাথেই পুরো খেলা জিতে যাবে, তাই একেবারে অকারণে বারবার প্রত্যাখ্যান করা বিপজ্জনক!</li>
+      <li><strong>মিশন:</strong> দলের সদস্যরা গোপনে সফলতা বা বিশ্বাসঘাতকতার কার্ড খেলবেন। নবাব পক্ষকে সবসময় সফলতার কার্ড খেলতে হয় — তাদের কোনো উপায় নেই। EIC পক্ষ ইচ্ছামতো যেকোনোটি খেলতে পারে।</li>
+      <li><strong>ফলাফল:</strong> কার্ডগুলো মিশিয়ে প্রকাশ করা হবে। একটিও বিশ্বাসঘাতকতার কার্ড থাকলেই সেই অধ্যায়ে EIC পক্ষ জয়ী (ব্যতিক্রম উপরের "খেলোয়াড় সংখ্যা" ট্যাবে দেখুন)।</li>
+    </ol>
+  </div>`;
+}
+function rulebookEndHTML(){
+  return `<div class="rulebook-section">
+    <h3>খেলার সমাপ্তি</h3>
+    <p>কোনো এক পক্ষ ৩টি অধ্যায় জিতলেই খেলা মূলত শেষ। EIC পক্ষ ৩টি জিতলে তারাই সরাসরি জয়ী।</p>
+    <p>কিন্তু নবাব পক্ষ ৩টি জিতলেও, EIC পক্ষ শেষ একটি সুযোগ পাবে — তারা একসাথে আলোচনা করবেন, এরপর মীর জাফরকে অনুমান করতে হবে নবাব পক্ষের মধ্যে আসল মীর মদন কে। সঠিক অনুমান হলে শেষ মুহূর্তে EIC পক্ষই জয়ী হয়ে যাবে; ভুল হলে নবাব পক্ষের জয় চূড়ান্ত থাকবে। ঠিক যেন ইতিহাসের সেই মুহূর্ত — যেখানে বিশ্বাসঘাতকতাই ছিল আসল অস্ত্র।</p>
+  </div>`;
+}
+
 /* ============ LANDING ============ */
 const SCREENS = {};
 
+SCREENS.rulebook = function(){
+  const wrap = el('div');
+  wrap.appendChild(el('div','title-block',
+    `<div class="eyebrow">Bengal, 1757</div><h1>পলাশী</h1><div class="sub">খেলার নিয়মাবলী</div>`));
+  const card = el('div','card');
+  const backBtn = el('button','rulebook-back','← ফিরে যান');
+  backBtn.onclick = ()=>{ client._showRulebook = false; render(); };
+  card.appendChild(backBtn);
+
+  const activeTab = client._rulebookTab || RULEBOOK_TABS[0].id;
+  const tabs = el('div','rulebook-tabs');
+  RULEBOOK_TABS.forEach(t=>{
+    const tabBtn = el('div','rulebook-tab'+(activeTab===t.id?' active':''), t.label);
+    tabBtn.onclick = ()=>{ client._rulebookTab = t.id; render(); };
+    tabs.appendChild(tabBtn);
+  });
+  card.appendChild(tabs);
+
+  const contentMap = {
+    intro: rulebookIntroHTML,
+    chars: rulebookCharsHTML,
+    counts: rulebookCountsHTML,
+    flow: rulebookFlowHTML,
+    end: rulebookEndHTML,
+  };
+  const content = el('div');
+  content.innerHTML = contentMap[activeTab]();
+  card.appendChild(content);
+
+  wrap.appendChild(card);
+  return wrap;
+};
+
+SCREENS.roomClosed = function(){
+  const wrap = el('div');
+  wrap.appendChild(el('div','title-block',
+    `<div class="eyebrow">Bengal, 1757</div><h1>পলাশী</h1>`));
+  const card = el('div','card');
+  card.appendChild(el('div','result-banner eic','এই রুমটি হোস্ট বন্ধ করে দিয়েছেন।'));
+  const btn = el('button','btn btn-gold','প্রথম পাতায় ফিরে যান');
+  btn.onclick = ()=> resetClientToLanding();
+  card.appendChild(btn);
+  wrap.appendChild(card);
+  return wrap;
+};
+
 SCREENS.landing_or_active = function(){
+  if(client.roomClosed){
+    return SCREENS.roomClosed();
+  }
   if(client.role === 'host' || client.role === 'player'){
     return SCREENS.gameScreen();
   }
@@ -405,6 +677,10 @@ SCREENS.landing = function(){
   wrap.appendChild(el('div','title-block',
     `<div class="eyebrow">Bengal, 1757</div><h1>পলাশী</h1>
      <div class="sub">অনলাইন সংস্করণ — একসাথে অনেক ফোনে খেলুন</div>`));
+
+  const rulebookBtn = el('button','btn btn-ghost','📖 খেলার নিয়ম দেখুন');
+  rulebookBtn.onclick = ()=>{ client._showRulebook = true; client._rulebookTab = null; render(); };
+  wrap.appendChild(rulebookBtn);
 
   const card = el('div','card');
   card.appendChild(el('h2','গেম হোস্ট করুন'));
@@ -439,6 +715,7 @@ SCREENS.landing = function(){
     }
     client.role = 'host';
     client.roomCode = code;
+    saveSession();
     startPolling();
   };
   card.appendChild(hostBtn);
@@ -482,6 +759,7 @@ SCREENS.landing = function(){
     if(room.players.find(p=>p.name===name)){
       // already joined (e.g. reconnect) -- just resume
       client.role='player'; client.roomCode=code; client.myName=name;
+      saveSession();
       startPolling();
       return;
     }
@@ -495,6 +773,7 @@ SCREENS.landing = function(){
       return;
     }
     client.role='player'; client.roomCode=code; client.myName=name;
+    saveSession();
     startPolling();
   };
   card2.appendChild(joinBtn);
@@ -506,10 +785,37 @@ SCREENS.landing = function(){
 };
 
 /* ============ GAME SCREEN ROUTER ============ */
+// Persistent leave/close-room controls shown across every phase of an active game.
+function gameCornerBar(){
+  const bar = el('div','corner-bar');
+  if(client.role==='player'){
+    const leaveBtn = el('button','corner-link danger','রুম ত্যাগ করুন');
+    leaveBtn.onclick = ()=>{
+      if(!confirm('আপনি কি নিশ্চিত রুম ত্যাগ করতে চান?')) return;
+      resetClientToLanding();
+    };
+    bar.appendChild(leaveBtn);
+  } else if(client.role==='host'){
+    const closeBtn = el('button','corner-link danger','রুম বন্ধ করুন');
+    closeBtn.onclick = ()=>{
+      if(!confirm('এটি রুমটি সম্পূর্ণভাবে বন্ধ করে দেবে এবং সব খেলোয়াড় বিচ্ছিন্ন হয়ে যাবে। নিশ্চিত?')) return;
+      submitAction(closeBtn, async ()=>{
+        const ok = await deleteRoom(client.roomCode);
+        if(!ok) return null;
+        resetClientToLanding();
+        return true;
+      });
+    };
+    bar.appendChild(closeBtn);
+  }
+  return bar;
+}
+
 SCREENS.gameScreen = function(){
   const room = client.room;
   const wrap = el('div');
   if(client.role==='host') wrap.appendChild(el('div','host-badge','অ্যাডমিন প্যানেল'));
+  wrap.appendChild(gameCornerBar());
   const banner = connectionBanner();
   if(banner) wrap.appendChild(banner);
 
@@ -583,6 +889,9 @@ PHASE.lobby = function(room){
   card.appendChild(roster);
 
   if(client.role==='host'){
+    const rulebookBtn = el('button','btn btn-outline','📖 খেলার নিয়ম দেখুন');
+    rulebookBtn.onclick = ()=>{ client._showRulebook = true; client._rulebookTab = null; render(); };
+    card.appendChild(rulebookBtn);
     const roleIds = getRoleIdsForCount(numPlayers);
     const nawabNames = roleIds.filter(id=>ROLE_DEFS[id].team==='nawab').map(id=>ROLE_DEFS[id].bn);
     const eicNames = roleIds.filter(id=>ROLE_DEFS[id].team==='eic').map(id=>ROLE_DEFS[id].bn);
@@ -1047,7 +1356,36 @@ PHASE.gameOver = function(room){
   return wrap;
 };
 
-render();
+async function boot(){
+  const session = loadSession();
+  if(session && session.roomCode && session.role){
+    const room = await loadRoom(session.roomCode);
+    const stillValid = room && (session.role==='host' || (session.myName && room.players.some(p=>p.name===session.myName)));
+    if(stillValid){
+      client.role = session.role;
+      client.roomCode = session.roomCode;
+      client.myName = session.myName || null;
+      client.room = room;
+      startPolling();
+      return;
+    }
+    clearSession();
+  }
+  render();
+}
+
+// Immediate placeholder while boot() checks for a restorable session, so a
+// mid-game reload doesn't flash the landing screen before jumping back in.
+(function renderBootingPlaceholder(){
+  const app = document.getElementById('app');
+  const wrap = el('div');
+  wrap.appendChild(el('div','title-block', `<div class="eyebrow">Bengal, 1757</div><h1>পলাশী</h1>`));
+  const card = el('div','card');
+  card.appendChild(el('div','waiting-box','<div class="spinner"></div><p>সেশন পরীক্ষা করা হচ্ছে...</p>'));
+  wrap.appendChild(card);
+  app.appendChild(wrap);
+})();
+boot();
 </script>
 </body>
 </html>
