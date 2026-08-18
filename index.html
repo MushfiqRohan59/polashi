@@ -196,6 +196,19 @@ function randomCode(){
 }
 function el(tag, cls, html){
   const e = document.createElement(tag);
+  // Headings/paragraphs are never built as an empty class-only container
+  // in this codebase -- every call site that passes just 2 args to a
+  // heading/paragraph tag means "this is the text/markup", not "this is
+  // the CSS class". Without this, e.g. el('h2','অধ্যায় ১...') would
+  // silently stash the heading text in className and leave the element
+  // visually empty (this is what produced the "blank propose card" bug:
+  // the chapter heading and "সেনাপতি ... বাছাই করবেন" prompt, both built
+  // this way, never appeared -- only the chip grid and button, built via
+  // the 3-arg form, did).
+  if(html === undefined && /^h[1-6]$|^p$/.test(tag)){
+    e.innerHTML = cls;
+    return e;
+  }
   if(cls) e.className = cls;
   if(html !== undefined) e.innerHTML = html;
   return e;
@@ -1236,6 +1249,7 @@ PHASE.vote = function(room){
         }
         return r;
       }));
+    card.appendChild(btn);
     card.appendChild(el('p', `প্রস্তাবিত দলঃ ${teamNames}`));
     wrap.appendChild(card);
     return wrap;
