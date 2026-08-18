@@ -312,20 +312,92 @@ async function saveRoom(code, obj){
     return false;
   }
 }
-// read-modify-write helper to reduce (not eliminate) race conditions between simultaneous player actions
-async function mutateRoom(code, mutator){
-  const fresh = await loadRoom(code);
-  if(!fresh) return null;
-  const updated = mutator(fresh) || fresh;
-  const ok = await saveRoom(code, updated);
-  if(!ok) return null;
-  // Update the acting client's own view immediately instead of making it wait
-  // up to one poll interval to see the effect of its own action.
-  if(client.roomCode === code){
-    client.room = updated;
-    render();
+// Same as loadRoom but also asks Firebase for the current ETag of the data,
+// which mutateRoom uses to make its write conditional (see saveRoomIfMatch
+// below). Firebase RTDB's REST API supports true atomic compare-and-swap
+// this way -- a conditional PUT is rejected with HTTP 412 if the data
+// changed since this ETag was issued -- so two overlapping mutateRoom calls
+// can never silently clobber one another; the loser gets a clean 'conflict'
+// instead and retries against the winner's result.
+async function loadRoomWithETag(code){
+  try{
+    const res = await withRetry(async ()=>{
+      const resp = await fetch(`${FIREBASE_DB_URL}/rooms/${code}.json`, {
+        headers: {'X-Firebase-ETag':'true'},
+      });
+      if(!resp.ok) throw new Error('Firebase GET failed: HTTP ' + resp.status);
+      const etag = resp.headers.get('ETag');
+      const body = await resp.json();
+      return {body, etag};
+    });
+    lastStorageError = null;
+    return {room: normalizeRoom(res.body) || null, etag: res.etag};
+  }catch(e){
+    lastStorageError = (e && e.message) ? e.message : String(e);
+    console.error('load failed', e);
+    return {room: null, etag: null};
   }
-  return updated;
+}
+// Conditional write: only applies if the room's ETag still matches what was
+// read (i.e. nobody else has written since). Returns 'ok', 'conflict'
+// (someone else wrote first -- caller should re-read and retry the whole
+// read-modify-write cycle), or 'error' (network/other failure, already
+// recorded in lastStorageError).
+async function saveRoomIfMatch(code, obj, etag){
+  try{
+    const resp = await withRetry(async ()=>{
+      const r = await fetch(`${FIREBASE_DB_URL}/rooms/${code}.json`, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json', 'if-match': etag},
+        body: JSON.stringify(obj),
+      });
+      // 412 means we lost the race -- that's a signal for mutateRoom to
+      // re-read and retry, not a transient failure to retry here as-is.
+      if(r.status === 412) return r;
+      if(!r.ok) throw new Error('Firebase PUT failed: HTTP ' + r.status);
+      return r;
+    });
+    lastStorageError = null;
+    return resp.status === 412 ? 'conflict' : 'ok';
+  }catch(e){
+    lastStorageError = (e && e.message) ? e.message : String(e);
+    console.error('save failed', e);
+    return 'error';
+  }
+}
+// Read-modify-write helper with true optimistic concurrency: the write is
+// conditional on Firebase's ETag for the room, so if another mutateRoom call
+// wrote in between our read and our write, ours is rejected instead of
+// silently overwriting theirs -- we just re-read the latest room and retry
+// the mutator against it. Combined with the phase-transition guards the
+// phase-changing mutators include (e.g. "only advance if still in the
+// expected phase"), a losing/duplicate call becomes a harmless no-op instead
+// of corrupting state -- this closes the race that previously let two
+// racing "reveal results / advance to next chapter" taps both apply and
+// silently drop one chapter's outcome.
+async function mutateRoom(code, mutator, attempts=6){
+  for(let i=0;i<attempts;i++){
+    const {room: fresh, etag} = await loadRoomWithETag(code);
+    if(!fresh) return null;
+    const updated = mutator(fresh) || fresh;
+    const result = await saveRoomIfMatch(code, updated, etag);
+    if(result === 'ok'){
+      // Update the acting client's own view immediately instead of making it
+      // wait up to one poll interval to see the effect of its own action.
+      if(client.roomCode === code){
+        client.room = updated;
+        client._lastRoomJSON = JSON.stringify(updated);
+        render();
+      }
+      return updated;
+    }
+    if(result === 'conflict'){
+      await sleep(60 + Math.random()*120);
+      continue; // someone else wrote first -- re-read the latest room and retry
+    }
+    return null; // network/other failure
+  }
+  return null; // exhausted retries -- extremely unlikely under normal contention
 }
 
 async function deleteRoom(code){
@@ -461,6 +533,7 @@ function startPolling(){
       clearSession();
       client.roomClosed = true;
       if(client.pollTimer){ clearInterval(client.pollTimer); client.pollTimer = null; }
+      client._lastRoomJSON = null;
       render();
       return;
     }
@@ -469,11 +542,40 @@ function startPolling(){
     if(room !== null || !client.room){
       client.room = room;
     }
-    render();
+    // Skip the render entirely when this poll returned data identical to
+    // what's already on screen. render() does app.innerHTML='' and rebuilds
+    // every node from scratch, and used to run on every ~1.1s tick
+    // regardless of whether anything actually changed -- if a tap landed on
+    // a button at the same moment a tick fired, the node under the user's
+    // finger got destroyed and rebuilt mid-click and the tap was silently
+    // lost, which read as buttons randomly needing a second press.
+    const roomJSON = JSON.stringify(client.room);
+    const errorChanged = lastStorageError !== client._lastErrorSnapshot;
+    const shouldRender = client._forceNextRender || roomJSON !== client._lastRoomJSON || errorChanged;
+    client._lastRoomJSON = roomJSON;
+    client._lastErrorSnapshot = lastStorageError;
+    client._forceNextRender = false;
+    if(shouldRender) render();
   };
   tick();
   client.pollTimer = setInterval(tick, 1100);
 }
+
+// Mobile browsers throttle or fully pause setInterval once a tab is
+// backgrounded or the screen locks, so the poll loop above can silently stop
+// firing during a long real-world discussion break and not resume on its
+// own -- the host's screen then goes stale until a manual refresh. The
+// moment the page becomes visible again, force one immediate fetch + render
+// (bypassing the no-op skip above, since neither the DOM nor the timer's
+// state should be trusted after an arbitrarily long background period even
+// if the data happens to look unchanged) and defensively restart the
+// interval rather than assuming it survived.
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState !== 'visible') return;
+  if(!client.roomCode || client.roomClosed) return;
+  client._forceNextRender = true;
+  startPolling();
+});
 
 // Fully local reset back to the landing screen: stops polling, wipes client
 // state and the persisted session, and re-renders. Used by leave/close-room
@@ -485,6 +587,9 @@ function resetClientToLanding(){
   client.myName = null;
   client.room = null;
   client.roomClosed = false;
+  client._lastRoomJSON = null;
+  client._lastErrorSnapshot = null;
+  client._forceNextRender = false;
   clearSession();
   render();
 }
@@ -901,6 +1006,7 @@ PHASE.lobby = function(room){
     btn.disabled = room.players.length !== numPlayers;
     btn.onclick = ()=> submitAction(btn, ()=>{
       return mutateRoom(client.roomCode, (r)=>{
+        if(r.game.phase !== 'lobby') return r; // already dealt by a racing/duplicate tap -- no-op
         const n = r.game.numPlayers || DEFAULT_NUM_PLAYERS;
         const roleList = shuffle(getRoleIdsForCount(n).map(id=>({team:ROLE_DEFS[id].team, roleId:id, bn:ROLE_DEFS[id].bn})));
         const order = shuffle(r.players.map(p=>p.name));
@@ -940,6 +1046,7 @@ PHASE.reveal = function(room){
     const btn = el('button','btn btn-gold', `অধ্যায় ১ শুরু করুন (${readyCount}/${game.numPlayers})`);
     btn.disabled = readyCount !== game.numPlayers;
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
+      if(r.game.phase !== 'reveal') return r; // already advanced by a racing/duplicate tap -- no-op
       r.game.phase='propose';
       return r;
     }));
@@ -1064,6 +1171,7 @@ PHASE.propose = function(room){
   btn.disabled = selected.length !== teamSize;
   btn.onclick = ()=> submitAction(btn, async ()=>{
     const result = await mutateRoom(client.roomCode, (r)=>{
+      if(r.game.phase !== 'propose') return r; // already finalized by a racing/duplicate tap -- no-op
       r.game.selectedTeam = selected;
       r.game.votes = {};
       r.game.phase = 'vote';
@@ -1104,6 +1212,7 @@ PHASE.vote = function(room){
     const btn = el('button','btn btn-gold','ভোটের ফলাফল প্রকাশ করুন');
     btn.disabled = voteCount !== game.numPlayers;
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
+        if(r.game.phase !== 'vote') return r; // already revealed by a racing/duplicate tap -- no-op
         const approvals = Object.values(r.game.votes).filter(v=>v==='approve').length;
         const rejections = Object.values(r.game.votes).filter(v=>v==='reject').length;
         const approved = approvals > rejections;
@@ -1174,6 +1283,7 @@ PHASE.mission = function(room){
     const btn = el('button','btn btn-gold','অধ্যায়ের ফলাফল প্রকাশ করুন');
     btn.disabled = playedCount !== needed;
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
+        if(r.game.phase !== 'mission') return r; // already revealed by a racing/duplicate tap -- no-op
         const betrayals = Object.values(r.game.missionCards).filter(v=>v==='betray').length;
         const needsTwo = r.game.numPlayers >= 7 && r.game.chapterIdx === 3;
         const outcome = betrayals >= (needsTwo ? 2 : 1) ? 'eic' : 'nawab';
@@ -1264,22 +1374,32 @@ PHASE.chapterResult = function(room){
   if(wins.eic >= 3){
     card.appendChild(el('p','EIC পক্ষ ৩টি অধ্যায় জিতে ফেলেছে — খেলা EIC-র জয়ে শেষ।'));
     const btn = el('button','btn btn-gold','চূড়ান্ত ফলাফল দেখুন');
-    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{ r.game.winner='eic'; r.game.phase='gameOver'; return r; }));
+    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
+        if(r.game.phase !== 'chapterResult') return r; // already advanced by a racing/duplicate tap -- no-op
+        r.game.winner='eic'; r.game.phase='gameOver'; return r;
+      }));
     card.appendChild(btn);
   } else if(wins.nawab >= 3){
     card.appendChild(el('p','নবাব পক্ষ ৩টি অধ্যায় জিতেছে! কিন্তু EIC পক্ষের শেষ সুযোগ বাকি — তারা যদি সঠিকভাবে মীর মদনকে চিহ্নিত করতে পারে, তবে জয় ছিনিয়ে নেবে।'));
     const btn = el('button','btn btn-gold','EIC-র চূড়ান্ত অনুমান পর্বে যান');
-    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{ r.game.phase='endgameGuess'; return r; }));
+    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
+        if(r.game.phase !== 'chapterResult') return r; // already advanced by a racing/duplicate tap -- no-op
+        r.game.phase='endgameGuess'; return r;
+      }));
     card.appendChild(btn);
   } else if(game.chapterIdx >= 4){
     // shouldn't normally happen (someone should have 3 by chapter 5) but guard anyway
     const winner = wins.nawab>wins.eic ? 'nawab':'eic';
     const btn = el('button','btn btn-gold','চূড়ান্ত ফলাফল দেখুন');
-    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{ r.game.winner=winner; r.game.phase='gameOver'; return r; }));
+    btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
+        if(r.game.phase !== 'chapterResult') return r; // already advanced by a racing/duplicate tap -- no-op
+        r.game.winner=winner; r.game.phase='gameOver'; return r;
+      }));
     card.appendChild(btn);
   } else {
     const btn = el('button','btn btn-gold', `অধ্যায় ${game.chapterIdx+2}-এ যান`);
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
+        if(r.game.phase !== 'chapterResult') return r; // already advanced by a racing/duplicate tap -- no-op
         r.game.chapterIdx += 1;
         r.game.proposerIdx = (r.game.proposerIdx+1) % r.game.numPlayers;
         r.game.selectedTeam = [];
@@ -1308,6 +1428,7 @@ PHASE.endgameGuess = function(room){
     if(client.role==='host'){
       const btn = el('button','btn btn-gold','চূড়ান্ত ফলাফল প্রকাশ করুন');
       btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
+          if(r.game.phase !== 'endgameGuess') return r; // already revealed by a racing/duplicate tap -- no-op
           const guessedRole = r.game.roles[r.game.eicGuess];
           const correct = guessedRole && guessedRole.roleId === 'mirmodon';
           r.game.winner = correct ? 'eic' : 'nawab';
@@ -1365,6 +1486,17 @@ PHASE.gameOver = function(room){
     const correct = guessedRole && guessedRole.roleId==='mirmodon';
     card.appendChild(el('p', `EIC-র অনুমান ছিল ${game.eicGuess} — ${correct ? 'সঠিক!' : 'ভুল।'}`));
   }
+
+  card.appendChild(el('h3','লাল দলের সত্য পরিচয়'));
+  const eicRoster = el('div','roster');
+  game.playersOrder.filter(name=>game.roles[name].team==='eic').forEach(name=>{
+    const role = game.roles[name];
+    const row = el('div','roster-item');
+    row.innerHTML = `<span>${name}</span><span class="tag eic">${role.bn}</span>`;
+    eicRoster.appendChild(row);
+  });
+  card.appendChild(eicRoster);
+
   card.appendChild(el('h3','সব ভূমিকা প্রকাশ'));
   const roster = el('div','roster');
   game.playersOrder.forEach(name=>{
@@ -1378,6 +1510,7 @@ PHASE.gameOver = function(room){
   if(client.role==='host'){
     const btn = el('button','btn btn-gold','নতুন খেলা শুরু করুন (একই কোড)');
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
+        if(r.game.phase !== 'gameOver') return r; // already reset by a racing/duplicate tap -- no-op
         r.game = freshGame(r.game.numPlayers);
         return r;
       }));
