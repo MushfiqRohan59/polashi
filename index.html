@@ -1430,12 +1430,32 @@ PHASE.chapterResult = function(room){
 };
 
 /* ---------------- ENDGAME GUESS (EIC identifies Mir Modon) ---------------- */
+// Shared by PHASE.endgameGuess (shown to Nawab-side players while EIC is
+// still choosing) and PHASE.gameOver (shown to everyone once the game ends)
+// so the two stay in sync instead of duplicating the same markup.
+function buildEicRosterReveal(game){
+  const box = el('div');
+  box.appendChild(el('h3','লাল দলের সত্য পরিচয়'));
+  const eicRoster = el('div','roster');
+  game.playersOrder.filter(name=>game.roles[name].team==='eic').forEach(name=>{
+    const role = game.roles[name];
+    const row = el('div','roster-item');
+    row.innerHTML = `<span>${name}</span><span class="tag eic">${role.bn}</span>`;
+    eicRoster.appendChild(row);
+  });
+  box.appendChild(eicRoster);
+  return box;
+}
+
 PHASE.endgameGuess = function(room){
   const game = room.game;
   const wrap = el('div');
   const card = el('div','card');
   card.appendChild(el('h2','EIC-র চূড়ান্ত সুযোগ'));
   card.appendChild(el('p','নবাব পক্ষ ৩টি অধ্যায় জিতেছে। কিন্তু EIC পক্ষ যদি সঠিকভাবে বলতে পারে কে "মীর মদন", তাহলে তারাই জিতবে।'));
+
+  const myRole2 = client.role==='player' ? game.roles[client.myName] : null;
+  const myTeam = myRole2 ? myRole2.team : null;
 
   if(game.eicGuess){
     card.appendChild(el('div','waiting-box', `<div class="spinner"></div><p>অনুমান জমা হয়েছে (${game.eicGuess})। ফলাফলের অপেক্ষায়...</p>`));
@@ -1451,12 +1471,13 @@ PHASE.endgameGuess = function(room){
         }));
       card.appendChild(btn);
     }
+    if(myTeam==='nawab'){
+      card.appendChild(buildEicRosterReveal(game));
+    }
     wrap.appendChild(card);
     return wrap;
   }
 
-  const myRole2 = client.role==='player' ? game.roles[client.myName] : null;
-  const myTeam = myRole2 ? myRole2.team : null;
   if(client.role==='player' && myTeam==='eic'){
     const isMirJafar = myRole2.roleId==='mirjafar';
     card.appendChild(el('p','আপনার দলের সাথে আলোচনা করে ঠিক করুন কে মীর মদন, তারপর বেছে নিন:'));
@@ -1484,6 +1505,9 @@ PHASE.endgameGuess = function(room){
     card.appendChild(grid);
   } else {
     card.appendChild(el('div','waiting-box','<div class="spinner"></div><p>EIC পক্ষ সিদ্ধান্ত নিচ্ছে...</p>'));
+    if(myTeam==='nawab'){
+      card.appendChild(buildEicRosterReveal(game));
+    }
   }
   wrap.appendChild(card);
   return wrap;
@@ -1501,15 +1525,7 @@ PHASE.gameOver = function(room){
     card.appendChild(el('p', `EIC-র অনুমান ছিল ${game.eicGuess} - ${correct ? 'সঠিক!' : 'ভুল।'}`));
   }
 
-  card.appendChild(el('h3','লাল দলের সত্য পরিচয়'));
-  const eicRoster = el('div','roster');
-  game.playersOrder.filter(name=>game.roles[name].team==='eic').forEach(name=>{
-    const role = game.roles[name];
-    const row = el('div','roster-item');
-    row.innerHTML = `<span>${name}</span><span class="tag eic">${role.bn}</span>`;
-    eicRoster.appendChild(row);
-  });
-  card.appendChild(eicRoster);
+  card.appendChild(buildEicRosterReveal(game));
 
   card.appendChild(el('h3','সব ভূমিকা প্রকাশ'));
   const roster = el('div','roster');
