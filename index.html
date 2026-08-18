@@ -159,18 +159,18 @@ const ROLE_DEFS = {
   ghaseti:      {bn:'ঘসেটি বেগম', team:'eic'},
   mohonlal:     {bn:'মোহন লাল', team:'nawab'},
   raydurlov:    {bn:'রায় দুর্লভ', team:'eic'},
+  debussy:      {bn:'ডেবুসি', team:'nawab'},
   saintfrais:   {bn:'সেইন্ট ফ্রে', team:'nawab'},
-  nawabextra:   {bn:'নবাব-পক্ষের অতিরিক্ত সৈনিক', team:'nawab'},
-  eicextra:     {bn:'EIC-পক্ষের অতিরিক্ত সৈনিক', team:'eic'},
+  umichand:     {bn:'উমিচাঁদ', team:'eic'},
 };
 // Role pool for a given player count, per the confirmed rulebook table.
 function getRoleIdsForCount(numPlayers){
   const ids = ['mirmodon','mirjafar','sirajuddaula','lutfunnesa','ghaseti'];
   if(numPlayers >= 6) ids.push('mohonlal');
   if(numPlayers >= 7) ids.push('raydurlov');
-  if(numPlayers >= 8) ids.push('saintfrais');
-  if(numPlayers >= 9) ids.push('nawabextra');
-  if(numPlayers >= 10) ids.push('eicextra');
+  if(numPlayers >= 8) ids.push('debussy');
+  if(numPlayers >= 9) ids.push('saintfrais');
+  if(numPlayers >= 10) ids.push('umichand');
   return ids;
 }
 const TEAM_SIZES_BY_COUNT = {
@@ -205,7 +205,7 @@ function el(tag, cls, html){
   // the chapter heading and "সেনাপতি ... বাছাই করবেন" prompt, both built
   // this way, never appeared -- only the chip grid and button, built via
   // the 3-arg form, did).
-  if(html === undefined && /^h[1-6]$|^p$/.test(tag)){
+  if(html === undefined && /^h[1-6]$|^p$|^label$/.test(tag)){
     e.innerHTML = cls;
     return e;
   }
@@ -281,6 +281,9 @@ function normalizeRoom(room){
   g.votes = g.votes || {};
   g.missionCards = g.missionCards || {};
   g.chapterResults = g.chapterResults || [];
+  g.powers = g.powers || defaultPowers();
+  g.spyVariant = !!g.spyVariant;
+  g.spyHistory = g.spyHistory || [];
   // Safety net: ready/vote/mission entries should only ever reference players
   // still in the room. Prune anything stale left behind by a missed reset or
   // a rejoin-under-a-different-name edge case, so these counts can never
@@ -449,7 +452,14 @@ function clearSession(){
   try{ localStorage.removeItem(SESSION_KEY); }catch(e){}
 }
 
-function freshGame(numPlayers){
+// Every non-mandatory character's power (Mohon Lal, Ghaseti Begum, Ray
+// Durlov, Umichand) is a host toggle per the rulebook -- only Mir Modon's
+// and Mir Jafar's abilities are mandatory. Defaults to all-on so a host who
+// doesn't think about it gets the same behavior the app always had.
+function defaultPowers(){
+  return {mohonlal:true, ghaseti:true, raydurlov:true, umichand:true};
+}
+function freshGame(numPlayers, powers, spyVariant){
   return {
     phase: 'lobby', // lobby, reveal, propose, vote, mission, chapterResult, endgameGuess, gameOver
     numPlayers: numPlayers || DEFAULT_NUM_PLAYERS,
@@ -465,6 +475,11 @@ function freshGame(numPlayers){
     chapterResults: [],
     eicGuess: null,
     winner: null,
+    powers: powers || defaultPowers(),
+    spyVariant: !!spyVariant, // গুপ্তচর optional variant -- off by default
+    spy: null,                // current Spy's name, private to that player
+    spyHistory: [],           // names who have already served as Spy
+    spyLastReveal: null,      // {checker, target, team, checkIdx} -- private to `checker`
   };
 }
 
@@ -624,25 +639,25 @@ const RULEBOOK_TABS = [
 ];
 const RULEBOOK_CHARACTERS = [
   {name:'মীর মদন', team:'nawab', group:'always', tag:'সর্বদা উপস্থিত',
-   text:'পলাশীর যুদ্ধের সেই বীর সেনাপতি, যিনি ইংরেজদের বিরুদ্ধে সবচেয়ে সাহসী লড়াই করেছিলেন। এই খেলায় তিনি নবাব পক্ষের একমাত্র মানুষ যিনি জানেন কারা EIC পক্ষে আছে - খেলা শুরুর সময়ই তিনি তাদের চিনে নেন। কিন্তু সাবধান - যদি রায় দুর্লভ খেলায় থাকেন (৭+ খেলোয়াড়), তিনি তার নজর এড়িয়ে যান, তাকে মীর মদন চিনতে পারেন না।'},
+   text:'পলাশীর যুদ্ধের সেই বীর সেনাপতি, যিনি ইংরেজদের বিরুদ্ধে সবচেয়ে সাহসী লড়াই করেছিলেন। এই খেলায় তিনি নবাব পক্ষের একমাত্র মানুষ যিনি জানেন কারা EIC পক্ষে আছে - এটি একটি বাধ্যতামূলক ক্ষমতা, সবসময় সক্রিয়। খেলা শুরুর সময়ই তিনি তাদের চিনে নেন। কিন্তু সাবধান - যদি রায় দুর্লভ খেলায় থাকেন (৭+ খেলোয়াড়) এবং তার ক্ষমতা চালু থাকে, তিনি তার নজর এড়িয়ে যান, তাকে মীর মদন চিনতে পারেন না।'},
   {name:'মীর জাফর', team:'eic', group:'always', tag:'সর্বদা উপস্থিত',
-   text:'ইতিহাসের সবচেয়ে আলোচিত বিশ্বাসঘাতক। EIC পক্ষের বাকিদের মতো তিনিও খেলার শুরু থেকে তার দলের সবাইকে চেনেন। খেলার একেবারে শেষ মুহূর্তে, যদি নবাব পক্ষ তিনটি অধ্যায় জিতে ফেলে, তাহলে দলের আলোচনার পর চূড়ান্ত সিদ্ধান্তটা তাকেই নিতে হয় - কে আসল মীর মদন, তা অনুমান করে EIC পক্ষের শেষ সুযোগটা ব্যবহার করা।'},
+   text:'ইতিহাসের সবচেয়ে আলোচিত বিশ্বাসঘাতক। এটিও একটি বাধ্যতামূলক ক্ষমতা - EIC পক্ষের বাকিদের মতো তিনিও খেলার শুরু থেকে তার দলের সবাইকে চেনেন। খেলার একেবারে শেষ মুহূর্তে, যদি নবাব পক্ষ তিনটি অধ্যায় জিতে ফেলে, তাহলে দলের আলোচনার পর চূড়ান্ত সিদ্ধান্তটা তাকেই নিতে হয় - কে আসল মীর মদন, তা অনুমান করে EIC পক্ষের শেষ সুযোগটা ব্যবহার করা।'},
   {name:'নবাব সিরাজউদ্দৌলা', team:'nawab', group:'base', tag:'মূল চরিত্র (৫+)',
    text:'বাংলার শেষ স্বাধীন নবাব। কোনো বিশেষ ক্ষমতা নেই - একজন সাধারণ নবাব-পক্ষীয় খেলোয়াড় হিসেবেই তিনি খেলেন, বাকি সবার মতোই অন্ধকারে থেকে নিজের দলকে বিশ্বাস করার চেষ্টা করেন।'},
   {name:'লুৎফুন্নেসা বেগম', team:'nawab', group:'base', tag:'মূল চরিত্র (৫+)',
    text:'নবাব সিরাজউদ্দৌলার স্ত্রী। তারও কোনো বিশেষ ক্ষমতা নেই - একজন সাধারণ নবাব-পক্ষীয় সদস্য হিসেবেই খেলেন।'},
   {name:'ঘসেটি বেগম', team:'eic', group:'base', tag:'মূল চরিত্র (৫+)',
-   text:'আলীবর্দী খাঁর কন্যা এবং সিরাজউদ্দৌলার বিরুদ্ধে ষড়যন্ত্রকারীদের একজন। তার একটি বিশেষ, ছলনাপূর্ণ ক্ষমতা আছে - যদি মোহন লাল খেলায় থাকেন (৬+ খেলোয়াড়), তিনি নিজেকে মীর মদন হিসেবে দেখাতে পারেন, যার ফলে মোহন লাল বিভ্রান্ত হয়ে পড়েন সত্যিকারের মীর মদন কে তা নিয়ে।'},
+   text:'আলীবর্দী খাঁর কন্যা এবং সিরাজউদ্দৌলার বিরুদ্ধে ষড়যন্ত্রকারীদের একজন। তার একটি বিশেষ, ছলনাপূর্ণ ক্ষমতা আছে (হোস্ট চাইলে বন্ধ রাখতে পারেন) - যদি মোহন লাল খেলায় থাকেন (৬+ খেলোয়াড়) এবং দুজনের ক্ষমতাই চালু থাকে, তিনি নিজেকে মীর মদন হিসেবে দেখাতে পারেন, যার ফলে মোহন লাল বিভ্রান্ত হয়ে পড়েন সত্যিকারের মীর মদন কে তা নিয়ে। মোহন লালের ক্ষমতা বন্ধ থাকলে তার এই ছলনার কোনো সুযোগই তৈরি হয় না।'},
   {name:'মোহন লাল', team:'nawab', group:'special', tag:'৬+ খেলোয়াড়ের খেলায় যুক্ত হন',
-   text:'সিরাজউদ্দৌলার প্রতি অবিচল বিশ্বস্ত এক সেনাপতি, যিনি যুদ্ধক্ষেত্রে বীরের মতো লড়ে প্রাণ দিয়েছিলেন। এই খেলায় তিনি মীর মদনকে খুঁজে বের করার চেষ্টা করেন - কিন্তু ঘসেটি বেগম যদি খেলায় থাকেন, তিনি দুজনের নাম দেখেন (আসল মীর মদন + ঘসেটি বেগম), কোনটা কে তা না জানিয়েই। তাকে অনুমান করে বুঝে নিতে হয় কে সত্যিকারের মীর মদন।'},
+   text:'সিরাজউদ্দৌলার প্রতি অবিচল বিশ্বস্ত এক সেনাপতি, যিনি যুদ্ধক্ষেত্রে বীরের মতো লড়ে প্রাণ দিয়েছিলেন। এই খেলায় তিনি মীর মদনকে খুঁজে বের করার চেষ্টা করেন (হোস্ট চাইলে এই ক্ষমতা বন্ধ রাখতে পারেন, তখন তিনি শুধুই একজন সাধারণ সদস্য) - ক্ষমতা চালু থাকলে, ঘসেটি বেগমের ক্ষমতাও চালু থাকা সাপেক্ষে তিনি দুজনের নাম দেখেন (আসল মীর মদন + ঘসেটি বেগম), কোনটা কে তা না জানিয়েই, আর তাকে অনুমান করে বুঝে নিতে হয় কে সত্যিকারের মীর মদন। ঘসেটির ক্ষমতা বন্ধ থাকলে তিনি সরাসরি প্রকৃত মীর মদনের নাম জেনে যান, কোনো ছলনা ছাড়াই।'},
   {name:'রায় দুর্লভ', team:'eic', group:'special', tag:'৭+ খেলোয়াড়ের খেলায় যুক্ত হন',
-   text:'ইতিহাসে তিনি ছিলেন সিরাজউদ্দৌলার বিরুদ্ধে অন্যতম ষড়যন্ত্রকারী, যুদ্ধক্ষেত্রে নীরব দর্শকের মতো দাঁড়িয়ে থেকেছিলেন। এই খেলায় তার বিশেষত্ব হলো - তিনি মীর মদনের নজর এড়িয়ে যান। অর্থাৎ মীর মদন EIC পক্ষের বাকিদের চিনলেও, রায় দুর্লভকে তিনি চিনতে পারেন না।'},
-  {name:'সেইন্ট ফ্রে', team:'nawab', group:'special', tag:'৮+ খেলোয়াড়ের খেলায় যুক্ত হন',
-   text:'নবাবের পক্ষে যুদ্ধ করা একজন ফরাসি সেনাপতি, যিনি শেষ পর্যন্ত মোহন লালের পাশে থেকে লড়েছিলেন। এই খেলায় কোনো বিশেষ ক্ষমতা নেই - একজন অতিরিক্ত নবাব-পক্ষীয় সদস্য হিসেবেই যুক্ত হন, যখন খেলোয়াড় সংখ্যা বেড়ে যায়।'},
-  {name:'নবাব-পক্ষের অতিরিক্ত সৈনিক', team:'nawab', group:'special', tag:'৯+ খেলোয়াড়ে যুক্ত হন',
+   text:'ইতিহাসে তিনি ছিলেন সিরাজউদ্দৌলার বিরুদ্ধে অন্যতম ষড়যন্ত্রকারী, যুদ্ধক্ষেত্রে নীরব দর্শকের মতো দাঁড়িয়ে থেকেছিলেন। এই খেলায় তার বিশেষত্ব হলো (হোস্ট চাইলে বন্ধ রাখতে পারেন) - ক্ষমতা চালু থাকলে তিনি মীর মদনের নজর এড়িয়ে যান, অর্থাৎ মীর মদন EIC পক্ষের বাকিদের চিনলেও রায় দুর্লভকে চিনতে পারেন না। বন্ধ থাকলে তিনি অন্য সবার মতোই মীর মদনের কাছে ধরা পড়েন।'},
+  {name:'ডেবুসি', team:'nawab', group:'special', tag:'৮+ খেলোয়াড়ের খেলায় যুক্ত হন',
+   text:'নবাবের পক্ষে যুদ্ধ করা একজন সেনাপতি। এই খেলায় কোনো বিশেষ ক্ষমতা নেই - একজন অতিরিক্ত নবাব-পক্ষীয় সদস্য হিসেবেই যুক্ত হন, যখন খেলোয়াড় সংখ্যা বেড়ে যায়।'},
+  {name:'সেইন্ট ফ্রে', team:'nawab', group:'special', tag:'৯+ খেলোয়াড়ে যুক্ত হন',
    text:'কোনো বিশেষ ক্ষমতা নেই। খেলোয়াড় সংখ্যা বাড়লে দল ভারসাম্য রাখতে আরেকজন নবাব-পক্ষীয় সদস্য প্রয়োজন হয়।'},
-  {name:'EIC-পক্ষের অতিরিক্ত সৈনিক', team:'eic', group:'special', tag:'১০ খেলোয়াড়ে যুক্ত হন',
-   text:'কোনো বিশেষ ক্ষমতা নেই। ১০ জনের খেলায় EIC পক্ষে আরেকজন সদস্য যুক্ত হয়ে দলের ভারসাম্য ঠিক রাখে।'},
+  {name:'উমিচাঁদ', team:'eic', group:'special', tag:'১০ খেলোয়াড়ে যুক্ত হন',
+   text:'বাংলার এক ধনী বণিক, ইতিহাসে যিনি চুক্তি রক্ষা না হওয়ায় প্রতারিত হয়েছিলেন। এই খেলায় তার একটি অস্বাভাবিক ক্ষমতা আছে (হোস্ট চাইলে বন্ধ রাখতে পারেন) - ক্ষমতা চালু থাকলে তিনি নিজেকে EIC পক্ষের বাকিদের কাছে প্রকাশ করেন না এবং তাদেরও চেনেন না, একা একজন এজেন্টের মতো কাজ করেন। তবে মীর মদন ঠিকই তাকে EIC পক্ষের সদস্য হিসেবে চিনে ফেলেন (রায় দুর্লভের ক্ষমতার মতো এখান থেকে লুকানোর কোনো উপায় তার নেই)। ক্ষমতা বন্ধ থাকলে তিনি অন্য সব EIC সদস্যের মতোই স্বাভাবিকভাবে দলের সবাইকে চেনেন।'},
 ];
 function renderCharCard(c){
   const initial = c.name.trim().charAt(0);
@@ -689,9 +704,9 @@ function rulebookCountsHTML(){
     <p><strong>৫ জন:</strong> নবাব পক্ষ (৩) - নবাব সিরাজউদ্দৌলা, লুৎফুন্নেসা বেগম, মীর মদন। EIC পক্ষ (২) - মীর জাফর, ঘসেটি বেগম। সবচেয়ে সহজ ও প্রাথমিক সংস্করণ, নতুন খেলোয়াড়দের জন্য আদর্শ শুরু।</p>
     <p><strong>৬ জন:</strong> নবাব পক্ষ (৪) - আগের তিনজনের সাথে যুক্ত হন মোহন লাল। EIC পক্ষ (২) - অপরিবর্তিত। এখান থেকেই মোহন লাল ও ঘসেটি বেগমের ছলনার খেলা শুরু হয়।</p>
     <p><strong>৭ জন:</strong> নবাব পক্ষ (৪) - অপরিবর্তিত। EIC পক্ষ (৩) - যুক্ত হন রায় দুর্লভ, যিনি মীর মদনের চোখ এড়িয়ে যান। এই সংখ্যা থেকেই ৪র্থ অধ্যায়ে বিশেষ নিয়ম চালু হয় (নিচে দেখুন)।</p>
-    <p><strong>৮ জন:</strong> নবাব পক্ষ (৫) - যুক্ত হন সেইন্ট ফ্রে। EIC পক্ষ (৩) - অপরিবর্তিত।</p>
-    <p><strong>৯ জন:</strong> নবাব পক্ষ (৬) - যুক্ত হন একজন অতিরিক্ত সৈনিক। EIC পক্ষ (৩) - অপরিবর্তিত।</p>
-    <p><strong>১০ জন:</strong> নবাব পক্ষ (৬) - অপরিবর্তিত। EIC পক্ষ (৪) - যুক্ত হন একজন অতিরিক্ত সৈনিক। সবচেয়ে বড়, সবচেয়ে জটিল এবং সবচেয়ে উত্তেজনাপূর্ণ সংস্করণ!</p>
+    <p><strong>৮ জন:</strong> নবাব পক্ষ (৫) - যুক্ত হন ডেবুসি। EIC পক্ষ (৩) - অপরিবর্তিত।</p>
+    <p><strong>৯ জন:</strong> নবাব পক্ষ (৬) - যুক্ত হন সেইন্ট ফ্রে। EIC পক্ষ (৩) - অপরিবর্তিত।</p>
+    <p><strong>১০ জন:</strong> নবাব পক্ষ (৬) - অপরিবর্তিত। EIC পক্ষ (৪) - যুক্ত হন উমিচাঁদ, যার নিজস্ব একটি ক্ষমতা আছে (ঐচ্ছিক)। সবচেয়ে বড়, সবচেয়ে জটিল এবং সবচেয়ে উত্তেজনাপূর্ণ সংস্করণ!</p>
     <h3>অধ্যায় অনুযায়ী দলের আকার</h3>
     <p>প্রতিটি অধ্যায়ে দলের আকার খেলোয়াড় সংখ্যার উপর নির্ভর করে বদলে যায় - এবং মজার ব্যাপার হলো, দলের আকার সবসময় বাড়তেই থাকে না, মাঝেমধ্যে ছোটও হয়ে যায়, যা খেলাকে আরও অনিশ্চিত করে তোলে।</p>
     <div style="overflow-x:auto;"><table class="rulebook-table">
@@ -709,11 +724,13 @@ function rulebookFlowHTML(){
   return `<div class="rulebook-section">
     <h3>খেলা শুরু</h3>
     <ol class="step-list">
-      <li>হোস্ট খেলোয়াড় সংখ্যা (৫-১০) বেছে নেবেন এবং রুম তৈরি করবেন।</li>
+      <li>হোস্ট খেলোয়াড় সংখ্যা (৫-১০) বেছে নেবেন। শুধু মীর মদন ও মীর জাফরের ক্ষমতা সব সময় বাধ্যতামূলক - বাকি সব ক্ষমতাসম্পন্ন চরিত্রের (মোহন লাল, ঘসেটি বেগম, রায় দুর্লভ, উমিচাঁদ) ক্ষমতা এই ধাপেই আলাদা করে চালু/বন্ধ করা যায় (ডিফল্ট সব চালু)। চাইলে "গুপ্তচর ভ্যারিয়েন্ট"ও এখানেই চালু করা যায় (নিচে দেখুন)। এরপর রুম তৈরি করবেন।</li>
       <li>সবাই রুম কোড দিয়ে যোগ দেবেন।</li>
       <li>সবাই যোগ দিলে হোস্ট "ভূমিকা বণ্টন" চাপবেন - প্রত্যেকের ফোনে গোপনে একটি চরিত্র দেখানো হবে।</li>
-      <li>প্রত্যেকে নিজের চরিত্র মনে রাখবেন। EIC পক্ষ নিজেদের মধ্যে একে অপরকে দেখতে পাবে, আর মীর মদন দেখতে পাবেন কারা EIC পক্ষে (রায় দুর্লভ ছাড়া, যদি তিনি খেলায় থাকেন)। মোহন লাল থাকলে তিনি মীর মদন খুঁজে বের করার একটা সূত্র পাবেন।</li>
+      <li>প্রত্যেকে নিজের চরিত্র মনে রাখবেন। EIC পক্ষ নিজেদের মধ্যে একে অপরকে দেখতে পাবে (উমিচাঁদের ক্ষমতা চালু থাকলে তিনি ব্যতিক্রম - দেখুন চরিত্র ট্যাব), আর মীর মদন দেখতে পাবেন কারা EIC পক্ষে (রায় দুর্লভের ক্ষমতা চালু থাকলে তিনি ছাড়া)। মোহন লালের ক্ষমতা চালু থাকলে তিনি মীর মদন খুঁজে বের করার একটা সূত্র পাবেন।</li>
     </ol>
+    <h3>ঐচ্ছিক: গুপ্তচর ভ্যারিয়েন্ট</h3>
+    <p>হোস্ট চাইলে এই বাড়তি নিয়মটি চালু করতে পারেন। প্রথম সেনাপতির ঠিক ডানপাশের খেলোয়াড় (পালা-ক্রমে আগের জন) গোপনে প্রথম "গুপ্তচর" নিযুক্ত হন - এটি শুধু তিনিই জানেন। ২য় অধ্যায়ের ফলাফল প্রকাশের পর গুপ্তচর একজন খেলোয়াড়কে বেছে নিয়ে তার পক্ষ (নবাব নাকি EIC, নির্দিষ্ট চরিত্র নয়) গোপনে জেনে নিতে পারেন - এরপর সেই খেলোয়াড়ই নতুন গুপ্তচর হয়ে যান। ৩য় অধ্যায়ের ফলাফল প্রকাশের পর এভাবে আরেকবার এই প্রক্রিয়া ঘটে। মোট তিনজন খেলোয়াড় এভাবে গুপ্তচরের ভূমিকা পালন করেন (শুরুর জন + ২ বার হস্তান্তর), এরপর আর কোনো নতুন check হয় না।</p>
     <h3>অধ্যায় পর্ব (প্রতি রাউন্ডে যা ঘটে)</h3>
     <ol class="step-list">
       <li><strong>দল গঠন:</strong> বর্তমান সেনাপতি (প্রতি অধ্যায়ে বদলায়) নির্দিষ্ট সংখ্যক সদস্য নিয়ে একটি দল প্রস্তাব করবেন (কতজন লাগবে তা উপরের টেবিল অনুযায়ী)।</li>
@@ -811,6 +828,39 @@ SCREENS.landing = function(){
     countGrid.appendChild(chip);
   });
   card.appendChild(countGrid);
+
+  if(!client._powers) client._powers = defaultPowers();
+  if(client._numPlayers){
+    // Only Mir Modon's and Mir Jafar's abilities are mandatory per the
+    // rulebook -- every other character's power is a host toggle,
+    // independent of the character simply being present as a plain team
+    // member at this player count.
+    const powerDefs = [
+      {key:'mohonlal', label:'মোহন লাল ক্ষমতা', minPlayers:6},
+      {key:'ghaseti', label:'ঘসেটি বেগম ক্ষমতা', minPlayers:6},
+      {key:'raydurlov', label:'রায় দুর্লভ ক্ষমতা', minPlayers:7},
+      {key:'umichand', label:'উমিচাঁদ ক্ষমতা', minPlayers:10},
+    ].filter(p=>client._numPlayers >= p.minPlayers);
+    if(powerDefs.length){
+      card.appendChild(el('label','চরিত্র ক্ষমতা (ঐচ্ছিক - চাইলে বন্ধ করুন)'));
+      const powerGrid = el('div','chip-grid');
+      powerDefs.forEach(p=>{
+        const on = client._powers[p.key];
+        const chip = el('div','chip'+(on?' selected':''), `${p.label} - ${on?'চালু':'বন্ধ'}`);
+        chip.onclick = ()=>{ client._powers[p.key] = !client._powers[p.key]; render(); };
+        powerGrid.appendChild(chip);
+      });
+      card.appendChild(powerGrid);
+    }
+  }
+
+  card.appendChild(el('label','গুপ্তচর ভ্যারিয়েন্ট (ঐচ্ছিক)'));
+  const spyGrid = el('div','chip-grid');
+  const spyChip = el('div','chip'+(client._spyVariant?' selected':''), `গুপ্তচর ভ্যারিয়েন্ট - ${client._spyVariant?'চালু':'বন্ধ'}`);
+  spyChip.onclick = ()=>{ client._spyVariant = !client._spyVariant; render(); };
+  spyGrid.appendChild(spyChip);
+  card.appendChild(spyGrid);
+
   const hostBtn = el('button','btn btn-gold','রুম তৈরি করুন');
   hostBtn.disabled = !client._numPlayers;
   const hostStatus = el('div','note-box');
@@ -822,7 +872,7 @@ SCREENS.landing = function(){
     hostBtn.innerHTML = '<span class="btn-spin"></span>তৈরি করা হচ্ছে...';
     hostStatus.style.display='none';
     const code = randomCode();
-    const ok = await saveRoom(code, {players:[], game: freshGame(client._numPlayers)});
+    const ok = await saveRoom(code, {players:[], game: freshGame(client._numPlayers, client._powers, client._spyVariant)});
     if(!ok){
       hostBtn.disabled = false;
       hostBtn.classList.remove('is-loading');
@@ -947,6 +997,26 @@ SCREENS.gameScreen = function(){
   const game = room.game;
   wrap.appendChild(el('div','title-block', `<div class="eyebrow">রুম কোড: ${client.roomCode}</div><h1>পলাশী</h1>`));
 
+  // গুপ্তচর ভ্যারিয়েন্ট: the current Spy privately knows it (never shown to
+  // anyone else). While a check is pending for them, their whole screen is
+  // replaced with the one-time target-picking screen instead of whatever
+  // phase is otherwise showing; once resolved, a dismissible private note
+  // reveals the checked player's team on top of their normal screen.
+  if(game.spyVariant && client.role==='player' && client.myName===game.spy){
+    wrap.appendChild(el('div','host-badge','আপনি গুপ্তচর'));
+    const spyHistory = game.spyHistory || [];
+    const checkAvailable = (game.chapterResults[1] !== undefined && spyHistory.length===0)
+      || (game.chapterResults[2] !== undefined && spyHistory.length===1);
+    if(checkAvailable){
+      wrap.appendChild(PHASE.spyCheck(room));
+      return wrap;
+    }
+  }
+  if(game.spyVariant && game.spyLastReveal && client.myName===game.spyLastReveal.checker
+     && client._dismissedSpyRevealAt !== game.spyLastReveal.checkIdx){
+    wrap.appendChild(buildSpyRevealNote(game.spyLastReveal));
+  }
+
   if(game.phase === 'lobby') wrap.appendChild(PHASE.lobby(room));
   else if(game.phase === 'reveal') wrap.appendChild(PHASE.reveal(room));
   else {
@@ -1025,10 +1095,16 @@ PHASE.lobby = function(room){
         const order = shuffle(r.players.map(p=>p.name));
         const roles = {};
         order.forEach((name,i)=>{ roles[name] = roleList[i]; });
-        r.game = freshGame(n);
+        r.game = freshGame(n, r.game.powers, r.game.spyVariant);
         r.game.playersOrder = order;
         r.game.roles = roles;
         r.game.phase = 'reveal';
+        if(r.game.spyVariant){
+          // Initial Spy: the player immediately to the right of the first
+          // sentapoti, i.e. the previous player in playersOrder, wrapping
+          // around to the last seat from proposerIdx 0.
+          r.game.spy = order[order.length - 1];
+        }
         return r;
       });
     });
@@ -1104,22 +1180,45 @@ PHASE.reveal = function(room){
       ? 'আপনি নবাবের প্রতি অনুগত। আপনি জানেন না আপনার সহযোগীরা কারা। লক্ষ্যঃ ৫টির মধ্যে ৩টি অধ্যায় জেতা।'
       : 'আপনি গোপনে EIC-র পক্ষে। ধরা না পড়ে অধ্যায়গুলো ব্যর্থ করে দিন।'));
     if(myRole.team==='eic'){
-      const others = game.playersOrder.filter(n=> n!==client.myName && game.roles[n].team==='eic');
-      const box = el('div','note-box');
-      box.innerHTML = '<strong>আপনার সহযোগী EIC এজেন্ট:</strong><br>' + others.map(n=>`${n} - <em>${game.roles[n].bn}</em>`).join('<br>');
-      card.appendChild(box);
+      // Umichand's power (if active): he doesn't reveal himself to the rest
+      // of EIC and isn't aware of them either -- an island within his own team.
+      const umichandHidden = game.powers.umichand && myRole.roleId==='umichand';
+      if(!umichandHidden){
+        const others = game.playersOrder.filter(n=>{
+          if(n===client.myName) return false;
+          const r = game.roles[n];
+          if(r.team!=='eic') return false;
+          if(r.roleId==='umichand' && game.powers.umichand) return false;
+          return true;
+        });
+        const box = el('div','note-box');
+        box.innerHTML = '<strong>আপনার সহযোগী EIC এজেন্ট:</strong><br>' + others.map(n=>`${n} - <em>${game.roles[n].bn}</em>`).join('<br>');
+        card.appendChild(box);
+      }
     } else if(myRole.team==='nawab' && myRole.roleId==='mirmodon'){
-      // Ray Durlov's card is hidden from Mir Modon's detection -- exclude him if present.
-      const eicMembers = game.playersOrder.filter(n=> game.roles[n].team==='eic' && game.roles[n].roleId!=='raydurlov');
+      // Ray Durlov's power (if active) hides him from Mir Modon's detection.
+      // Umichand is never excluded here regardless of his own power toggle.
+      const eicMembers = game.playersOrder.filter(n=>{
+        const r = game.roles[n];
+        if(r.team!=='eic') return false;
+        if(r.roleId==='raydurlov' && game.powers.raydurlov) return false;
+        return true;
+      });
       const box = el('div','note-box');
       box.innerHTML = '<strong>আপনি জানেন এরা EIC পক্ষে আছে:</strong><br>' + eicMembers.map(n=>`${n} - <em>${game.roles[n].bn}</em>`).join('<br>');
       card.appendChild(box);
-    } else if(myRole.team==='nawab' && myRole.roleId==='mohonlal'){
+    } else if(myRole.team==='nawab' && myRole.roleId==='mohonlal' && game.powers.mohonlal){
       const mirModonName = game.playersOrder.find(n=> game.roles[n].roleId==='mirmodon');
-      const ghasetiName = game.playersOrder.find(n=> game.roles[n].roleId==='ghaseti');
-      const candidates = shuffle([mirModonName, ghasetiName].filter(Boolean));
       const box = el('div','note-box');
-      box.innerHTML = '<strong>এদের মধ্যে একজন মীর মদন:</strong><br>' + candidates.join('<br>');
+      if(game.powers.ghaseti){
+        const ghasetiName = game.playersOrder.find(n=> game.roles[n].roleId==='ghaseti');
+        const candidates = shuffle([mirModonName, ghasetiName].filter(Boolean));
+        box.innerHTML = '<strong>এদের মধ্যে একজন মীর মদন:</strong><br>' + candidates.join('<br>');
+      } else {
+        // Ghaseti's decoy power is off, so there's nothing to disguise
+        // Mir Modon behind -- Mohon Lal sees the real identity directly.
+        box.innerHTML = '<strong>প্রকৃত মীর মদন:</strong><br>' + mirModonName;
+      }
       card.appendChild(box);
     }
     const btn = el('button','btn btn-outline','মনে রেখেছি - প্রস্তুত');
@@ -1137,6 +1236,57 @@ PHASE.reveal = function(room){
   wrap.appendChild(card);
   return wrap;
 };
+
+/* ---------------- SPY CHECK (গুপ্তচর ভ্যারিয়েন্ট) ---------------- */
+// Shown instead of the normal phase screen to whichever player currently
+// holds the Spy role, whenever a check becomes available (see
+// SCREENS.gameScreen's interception). Picking a target reveals only that
+// player's TEAM, never their specific character, and privately -- the
+// result is never shown to anyone but the checking Spy.
+PHASE.spyCheck = function(room){
+  const game = room.game;
+  const wrap = el('div');
+  const card = el('div','card');
+  card.appendChild(el('h2','গুপ্তচরের সুযোগ'));
+  card.appendChild(el('p','আপনি এই মুহূর্তে গুপ্তচর। অন্য যেকোনো একজন খেলোয়াড়কে বেছে নিন - আপনি শুধু জানতে পারবেন তিনি কোন পক্ষে আছেন (নবাব নাকি EIC), তার নির্দিষ্ট চরিত্র নয়। তারপর তিনিই পরবর্তী গুপ্তচর হয়ে যাবেন।'));
+
+  const spyHistory = game.spyHistory || [];
+  const excluded = new Set([client.myName, ...spyHistory]);
+  const grid = el('div','chip-grid');
+  const chips = [];
+  game.playersOrder.filter(n=>!excluded.has(n)).forEach(name=>{
+    const chip = el('div','chip', name);
+    chip.onclick = ()=> submitChipAction(chip, chips, ()=> mutateRoom(client.roomCode, (r)=>{
+        if(r.game.spy !== client.myName) return r; // already resolved by a racing/duplicate tap -- no-op
+        const history = r.game.spyHistory || [];
+        const targetRole = r.game.roles[name];
+        r.game.spyLastReveal = { checker: client.myName, target: name, team: targetRole.team, checkIdx: history.length };
+        r.game.spyHistory = [...history, client.myName];
+        r.game.spy = name;
+        return r;
+      }));
+    chips.push(chip);
+    grid.appendChild(chip);
+  });
+  card.appendChild(grid);
+  wrap.appendChild(card);
+  return wrap;
+};
+
+// Private "here's what you learned" note shown only to the player who just
+// made a Spy check, on top of whatever screen they're otherwise seeing,
+// until they dismiss it. Reveals only the checked player's team, never
+// their specific character.
+function buildSpyRevealNote(reveal){
+  const box = el('div','card');
+  box.appendChild(el('h3','গুপ্তচরের ফলাফল (গোপনীয়)'));
+  const teamLabel = reveal.team==='nawab' ? 'নবাব পক্ষ' : 'EIC পক্ষ';
+  box.appendChild(el('p', `আপনি ${reveal.target}-কে পরীক্ষা করেছিলেন - তিনি ${teamLabel}-এ আছেন। এই তথ্য শুধু আপনিই জানেন।`));
+  const dismissBtn = el('button','btn btn-outline','বুঝেছি');
+  dismissBtn.onclick = ()=>{ client._dismissedSpyRevealAt = reveal.checkIdx; render(); };
+  box.appendChild(dismissBtn);
+  return box;
+}
 
 /* ---------------- PROPOSE ---------------- */
 PHASE.propose = function(room){
@@ -1541,7 +1691,7 @@ PHASE.gameOver = function(room){
     const btn = el('button','btn btn-gold','নতুন খেলা শুরু করুন (একই কোড)');
     btn.onclick = ()=> submitAction(btn, ()=> mutateRoom(client.roomCode, (r)=>{
         if(r.game.phase !== 'gameOver') return r; // already reset by a racing/duplicate tap -- no-op
-        r.game = freshGame(r.game.numPlayers);
+        r.game = freshGame(r.game.numPlayers, r.game.powers, r.game.spyVariant);
         return r;
       }));
     card.appendChild(btn);
