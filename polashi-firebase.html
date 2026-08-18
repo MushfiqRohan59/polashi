@@ -678,7 +678,7 @@ SCREENS.landing = function(){
     `<div class="eyebrow">Bengal, 1757</div><h1>পলাশী</h1>
      <div class="sub">অনলাইন সংস্করণ — একসাথে অনেক ফোনে খেলুন</div>`));
 
-  const rulebookBtn = el('button','btn btn-ghost','📖 খেলার নিয়ম দেখুন');
+  const rulebookBtn = el('button','btn btn-ghost','খেলার নিয়ম দেখুন');
   rulebookBtn.onclick = ()=>{ client._showRulebook = true; client._rulebookTab = null; render(); };
   wrap.appendChild(rulebookBtn);
 
@@ -889,7 +889,7 @@ PHASE.lobby = function(room){
   card.appendChild(roster);
 
   if(client.role==='host'){
-    const rulebookBtn = el('button','btn btn-outline','📖 খেলার নিয়ম দেখুন');
+    const rulebookBtn = el('button','btn btn-outline','খেলার নিয়ম দেখুন');
     rulebookBtn.onclick = ()=>{ client._showRulebook = true; client._rulebookTab = null; render(); };
     card.appendChild(rulebookBtn);
     const roleIds = getRoleIdsForCount(numPlayers);
