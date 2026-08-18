@@ -1026,6 +1026,16 @@ PHASE.propose = function(room){
   const proposer = game.playersOrder[game.proposerIdx];
   const teamSize = teamSizesFor(game.numPlayers)[game.chapterIdx];
 
+  if(game._lastVoteBreakdown && game._lastVoteApproved === false && client._dismissedVoteBreakdownAt !== game.rejectCount){
+    const lastVoteCard = el('div','card');
+    lastVoteCard.appendChild(el('h3','গত ভোট'));
+    lastVoteCard.appendChild(buildVoteBreakdownList(game._lastVoteBreakdown, game.playersOrder));
+    const dismissBtn = el('button','btn btn-outline','বুঝেছি');
+    dismissBtn.onclick = ()=>{ client._dismissedVoteBreakdownAt = game.rejectCount; render(); };
+    lastVoteCard.appendChild(dismissBtn);
+    wrap.appendChild(lastVoteCard);
+  }
+
   card.appendChild(el('h2', `অধ্যায় ${game.chapterIdx+1}: দল মনোনয়ন`));
   card.appendChild(el('p', `সেনাপতি: <strong>${proposer}</strong> — ${teamSize} জনের দল বাছাই করবেন।`));
 
@@ -1067,6 +1077,18 @@ PHASE.propose = function(room){
   return wrap;
 };
 
+function buildVoteBreakdownList(breakdown, playersOrder){
+  const roster = el('div','roster');
+  (playersOrder||Object.keys(breakdown)).forEach(name=>{
+    const v = breakdown[name];
+    if(!v) return;
+    const row = el('div','roster-item');
+    row.innerHTML = `<span>${name}</span><span class="tag ${v==='approve'?'nawab':'eic'}">${v==='approve'?'অনুমোদন':'প্রত্যাখ্যান'}</span>`;
+    roster.appendChild(row);
+  });
+  return roster;
+}
+
 /* ---------------- VOTE ---------------- */
 PHASE.vote = function(room){
   const game = room.game;
@@ -1074,7 +1096,6 @@ PHASE.vote = function(room){
   const card = el('div','card');
   const teamNames = game.selectedTeam.join(', ');
   card.appendChild(el('h2', `অধ্যায় ${game.chapterIdx+1}: পরিষদের ভোট`));
-  card.appendChild(el('p', `প্রস্তাবিত দলঃ ${teamNames}`));
 
   const voteCount = Math.min(Object.keys(game.votes||{}).length, room.players.length, game.numPlayers);
 
@@ -1088,6 +1109,7 @@ PHASE.vote = function(room){
         const approved = approvals > rejections;
         r.game._lastVoteApproved = approved;
         r.game._lastVoteTally = {approvals, rejections};
+        r.game._lastVoteBreakdown = {...r.game.votes};
         if(approved){
           r.game.rejectCount = 0;
           r.game.missionCards = {};
@@ -1105,7 +1127,7 @@ PHASE.vote = function(room){
         }
         return r;
       }));
-    card.appendChild(btn);
+    card.appendChild(el('p', `প্রস্তাবিত দলঃ ${teamNames}`));
     wrap.appendChild(card);
     return wrap;
   }
@@ -1131,6 +1153,7 @@ PHASE.vote = function(room){
     row.appendChild(approveBtn); row.appendChild(rejectBtn);
     card.appendChild(row);
   }
+  card.appendChild(el('p', `প্রস্তাবিত দলঃ ${teamNames}`));
   wrap.appendChild(card);
   return wrap;
 };
@@ -1167,6 +1190,10 @@ PHASE.mission = function(room){
   const onMission = game.selectedTeam.includes(client.myName);
   if(!onMission){
     card.appendChild(el('div','waiting-box', `<div class="spinner"></div><p>এই অধ্যায়ে আপনি নেই। দলের সিদ্ধান্তের অপেক্ষায়... (${playedCount}/${needed})</p>`));
+    if(game._lastVoteBreakdown){
+      card.appendChild(el('h3','গত ভোট'));
+      card.appendChild(buildVoteBreakdownList(game._lastVoteBreakdown, game.playersOrder));
+    }
     wrap.appendChild(card);
     return wrap;
   }
@@ -1207,6 +1234,10 @@ PHASE.mission = function(room){
       }));
     row.appendChild(s1); row.appendChild(s2);
     card.appendChild(row);
+  }
+  if(game._lastVoteBreakdown){
+    card.appendChild(el('h3','গত ভোট'));
+    card.appendChild(buildVoteBreakdownList(game._lastVoteBreakdown, game.playersOrder));
   }
   wrap.appendChild(card);
   return wrap;
